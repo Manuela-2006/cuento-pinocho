@@ -23,14 +23,11 @@ export default function MapScrollCamera() {
     let animationFrameId: number;
 
     const tryInit = () => {
-      let svg = document.querySelector("#map-viewport svg") as SVGSVGElement | null;
+      let svg = document.querySelector(".mapViewport svg") as SVGSVGElement | null;
 
       if (!svg) {
-        svg = document.querySelector(".mapViewport svg") as SVGSVGElement | null;
-      }
-
-      if (!svg) {
-        svg = document.querySelector("svg") as SVGSVGElement | null;
+        const candidates = Array.from(document.querySelectorAll("svg")) as SVGSVGElement[];
+        svg = candidates.find((candidate) => candidate.querySelector("#map")) ?? null;
       }
 
       if (!svg) {
@@ -43,6 +40,7 @@ export default function MapScrollCamera() {
 
       const mapGroup = svg.querySelector("#map") as SVGGElement | null;
       if (!mapGroup) {
+        animationFrameId = requestAnimationFrame(tryInit);
         return;
       }
 

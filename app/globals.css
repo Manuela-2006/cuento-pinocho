@@ -1,26 +1,266 @@
-@import "tailwindcss";
+/* globals.css */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: auto;
+  min-height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+/* Contenedor del mapa FIJO */
+.mapViewport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  background: #1a1a1a; /* Fondo oscuro para ver mejor */
+}
+
+/* Capa del mapa (para aplicar blur sin afectar overlays) */
+.mapLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* El SVG dentro del viewport */
+.mapViewport svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Overlay de escenas de Geppetto */
+.geppettoOverlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.geppettoOverlay.is-active {
+  pointer-events: auto;
+}
+
+.scenePhoto.is-video {
+  cursor: pointer;
+  outline: none;
+}
+
+.geppettoVideoClose {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 30;
+}
+
+.scenePhoto {
+  position: absolute;
+  max-width: min(85vw, 960px);
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.4s ease;
+}
+
+.sceneSvg {
+  width: min(85vw, 960px);
+  height: min(80vh, 720px);
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.sceneSvgInner,
+.sceneSvgInner svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 24px;
+}
+
+.sceneSvgVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sceneSvg.is-playing .sceneSvgVideo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sceneSvg.is-playing .sceneSvgInner {
+  opacity: 0;
+}
+
+.sceneSvg svg #pinochodemadera,
+.sceneSvg svg [data-name="pinochodemadera"] {
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.sceneSvg svg #image_1_1769795691079\ 1 {
+  pointer-events: none;
+}
+
+/* Contenedor de las secciones de scroll */
+.story {
+  position: relative;
+  z-index: 10;
+  pointer-events: none; /* Las burbujas pueden tener pointer-events: auto */
+}
+
+/* Cada escena ocupa toda la pantalla */
+.scene {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 2rem;
+  pointer-events: none;
+}
+
+.geppetto-sequence {
+  height: 600vh;
+  align-items: center;
+}
+
+.sequenceHint {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Burbujas de texto */
+.bubble {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 1rem 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+/* Ocultar markers de ScrollTrigger sin afectar su funcionamiento */
+.gsap-marker-start,
+.gsap-marker-end,
+.gsap-marker-scroller-start,
+.gsap-marker-scroller-end {
+  display: none !important;
+}
+
+/* Ocultar scrollbar nativa (usamos la nariz personalizada) */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Nariz de Pinocho (barra de progreso cartoon) */
+.scrollNose {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 90px;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 18px;
+  --nose-color: #c88352;
+  --nose-color-dark: #9c5a30;
+  --nose-color-light: #e0aa7a;
+  --nose-offset: -8px;
+  --nose-join: 0px;
+}
+
+.pinochoFace {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.pinochoFace img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.noseTrack {
+  position: relative;
+  flex: 1;
+  height: 14px;
+  margin-right: 10px;
+  margin-top: var(--nose-offset);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, #d89a5f, #8a4f27);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset -1px 0 3px rgba(0, 0, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.28);
+  opacity: 0.9;
+}
+
+.noseFill {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(var(--scroll-progress, 0));
+  transform-origin: right;
+  border-radius: 0 999px 999px 0;
+  clip-path: polygon(100% 0, 6% 0, 0 50%, 6% 100%, 100% 100%);
+  background:
+    linear-gradient(180deg, #c9793f 0%, #9b5a2f 45%, #7b4322 100%);
+  box-shadow:
+    inset -1px -1px 3px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.4);
 }

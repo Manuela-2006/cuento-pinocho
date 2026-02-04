@@ -21,7 +21,7 @@ body {
   height: 100vh;
   z-index: 0;
   overflow: hidden;
-  background: #1a1a1a; /* Fondo oscuro para ver mejor */
+  background: #1a1a1a;
 }
 
 /* Capa del mapa (para aplicar blur sin afectar overlays) */
@@ -88,6 +88,132 @@ body {
   transition: opacity 0.4s ease;
 }
 
+.sceneFrame {
+  /* MISMAS propiedades que .scenePhoto para que se apilen correctamente */
+  position: absolute;
+  max-width: min(85vw, 960px);
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.4s ease;
+  display: block;
+}
+
+.sceneFrameImage {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  display: block;
+}
+
+.sceneCornerBox {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 320px;
+  min-height: 140px;
+  border-radius: 14px;
+  background: rgba(248, 237, 219, 0.88);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  padding: 0.8rem 0.8rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  line-height: 1.35;
+  color: #3c2414;
+  font-weight: 600;
+  text-align: left;
+  display: grid;
+  align-content: center;
+  margin-left: 12px;
+  z-index: 2;
+}
+
+.sceneCornerTopLeft {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  right: auto;
+  bottom: auto;
+  width: 380px;
+  min-height: 120px;
+  border-radius: 14px;
+  background: rgba(248, 237, 219, 0.88);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  padding: 0.8rem 0.8rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  line-height: 1.35;
+  color: #3c2414;
+  font-weight: 600;
+  text-align: left;
+  display: grid;
+  align-content: center;
+  z-index: 2;
+}
+
+.sceneParagraphHero {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  max-width: min(40%, 380px);
+  z-index: 2;
+  text-align: left;
+}
+
+.sceneTitleHero {
+  /* Usa las propiedades de .sceneCornerTopLeft */
+}
+
+/* Posiciones adicionales para cuadros de texto */
+.sceneCornerTopRight {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  left: auto;
+  bottom: auto;
+  width: 520px;
+  min-height: 140px;
+  border-radius: 14px;
+  background: rgba(248, 237, 219, 0.88);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  padding: 0.8rem 0.8rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  line-height: 1.35;
+  color: #3c2414;
+  font-weight: 600;
+  text-align: left;
+  display: grid;
+  align-content: center;
+  z-index: 2;
+}
+
+.sceneCornerBottomLeft {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  right: auto;
+  top: auto;
+  width: 360px;
+  min-height: 140px;
+  border-radius: 14px;
+  background: rgba(248, 237, 219, 0.88);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  padding: 0.8rem 0.8rem;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  line-height: 1.35;
+  color: #3c2414;
+  font-weight: 600;
+  text-align: left;
+  display: grid;
+  align-content: center;
+  z-index: 2;
+}
+
 .sceneSvg {
   width: min(85vw, 960px);
   height: min(80vh, 720px);
@@ -95,6 +221,7 @@ body {
   place-items: center;
   border-radius: 24px;
   overflow: hidden;
+  position: relative;
 }
 
 .sceneSvgInner,
@@ -114,6 +241,7 @@ body {
   border-radius: 24px;
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
 .sceneSvg.is-playing .sceneSvgVideo {
@@ -123,6 +251,34 @@ body {
 
 .sceneSvg.is-playing .sceneSvgInner {
   opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sceneSvgAfter {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 2;
+}
+
+.sceneSvgAfter.is-visible {
+  opacity: 1;
+}
+
+.sceneSvg.is-fading .sceneSvgVideo {
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.sceneSvg.is-fading .sceneSvgInner {
+  opacity: 1;
+  transition: opacity 0.1s ease;
 }
 
 .sceneSvg svg #pinochodemadera,
@@ -135,11 +291,71 @@ body {
   pointer-events: none;
 }
 
+/* Tooltip tipo "pensamiento" (óvalo + 3 burbujas) - COLOR CREMA SIN BORDE */
+.grilloTooltip {
+  background: rgba(248, 237, 219, 0.95);
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 1.4rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2b1a10;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.4;
+  overflow: visible;
+  /* Solo transición de opacity, NO de posición */
+  transition: opacity 0.15s ease;
+}
+
+/* Cola de pensamiento con 3 burbujas HACIA ARRIBA - SIN BORDES NEGROS */
+/* Cola de pensamiento con 3 burbujas HACIA ARRIBA-DERECHA - SIN BORDES NEGROS */
+.grilloTooltip .thoughtTail {
+  position: absolute;
+  left: 15%;      /* Posicionado hacia la derecha del bocadillo */
+  Bottom: -50px;      /* Arriba del bocadillo */
+  width: 12px;
+  height: 12px;
+  background: rgba(248, 237, 219, 0.95);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Burbujas adicionales en diagonal hacia arriba-derecha */
+.grilloTooltip .thoughtTail::before,
+.grilloTooltip .thoughtTail::after {
+  content: '';
+  position: absolute;
+  background: rgba(248, 237, 219, 0.95);
+  border-radius: 999px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Segunda burbuja (mediana) */
+.grilloTooltip .thoughtTail::before {
+  width: 16px;
+  height: 16px;
+  left: 18px;     /* Más a la derecha */
+  top: -20px;      /* Más arriba */
+}
+
+/* Tercera burbuja (más grande, la más cercana al grillo) */
+.grilloTooltip .thoughtTail::after {
+  width: 20px;
+  height: 20px;
+  left: 40px;     /* Aún más a la derecha */
+  top: -35px;      /* Más arriba */
+}
+
 /* Contenedor de las secciones de scroll */
 .story {
   position: relative;
   z-index: 10;
-  pointer-events: none; /* Las burbujas pueden tener pointer-events: auto */
+  pointer-events: none;
 }
 
 /* Cada escena ocupa toda la pantalla */

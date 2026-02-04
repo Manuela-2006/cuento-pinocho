@@ -130,6 +130,7 @@ export default function MapScrollCamera() {
         gsap.set(photos[0], { autoAlpha: 1 });
 
         let activeIndex = 0;
+        photos[0]?.classList.add("is-active");
 
         const sequenceTrigger = ScrollTrigger.create({
           trigger: geppettoSequence,
@@ -150,11 +151,13 @@ export default function MapScrollCamera() {
             gsap.to(mapLayer, { filter: "blur(0px)", duration: 0.6, ease: "power2.out" });
             gsap.to(overlay, { autoAlpha: 0, duration: 0.4, ease: "power2.out" });
             overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("geppetto-sequence-leave"));
           },
           onLeaveBack: () => {
             gsap.to(mapLayer, { filter: "blur(0px)", duration: 0.6, ease: "power2.out" });
             gsap.to(overlay, { autoAlpha: 0, duration: 0.4, ease: "power2.out" });
             overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("geppetto-sequence-leave"));
           },
           onUpdate: (self) => {
             const nextIndex = Math.min(
@@ -165,12 +168,18 @@ export default function MapScrollCamera() {
             if (nextIndex !== activeIndex) {
               gsap.to(photos[activeIndex], { autoAlpha: 0, duration: 0.3 });
               gsap.to(photos[nextIndex], { autoAlpha: 1, duration: 0.3 });
+              photos[activeIndex]?.classList.remove("is-active");
+              photos[nextIndex]?.classList.add("is-active");
               activeIndex = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("geppetto-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
         });
 
         triggers.push(sequenceTrigger);
+
       }
     };
 

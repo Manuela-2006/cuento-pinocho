@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -89,7 +89,7 @@ export default function CircusOverlay() {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Solo si el cursor está en la zona izquierda superior
+    // Solo si el cursor estÃ¡ en la zona izquierda superior
     if (x > rect.width * 0.5 || y > rect.height * 0.5) return;
 
     const colors = ["#ff5f6d", "#ffc371", "#7afcff", "#ffd166", "#8bdc65", "#b388ff"];
@@ -180,9 +180,9 @@ export default function CircusOverlay() {
                 className="sceneCornerBox sceneCornerTopRight"
                 style={{ width: "360px", minHeight: "160px" }}
               >
-                Pinocho llegó a un gran teatro de marionetas, lleno de luces y música.
-                Allí conoció a un hombre grande llamado Stromboli, que exclamó sorprendido:
-                ¡Una marioneta que camina sola! ¡Serás una gran estrella!
+                Pinocho llegÃ³ a un gran teatro de marionetas, lleno de luces y mÃºsica.
+                AllÃ­ conociÃ³ a un hombre grande llamado Stromboli, que exclamÃ³ sorprendido:
+                Â¡Una marioneta que camina sola! Â¡SerÃ¡s una gran estrella!
               </div>
             </div>
           );
@@ -198,8 +198,8 @@ export default function CircusOverlay() {
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
               <div className="sceneCornerBox sceneParagraphHero" style={{ width: "300px" }}>
-                Pinocho cantó y bailó sobre el escenario.
-                El público aplaudía con entusiasmo y él se sentía feliz, importante y famoso.
+                Pinocho cantÃ³ y bailÃ³ sobre el escenario.
+                El pÃºblico aplaudÃ­a con entusiasmo y Ã©l se sentÃ­a feliz, importante y famoso.
               </div>
               {confetti.map((piece) => (
                 <div
@@ -231,11 +231,11 @@ export default function CircusOverlay() {
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
               <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "340px" }}>
-                Después del espectáculo, Stromboli le preguntó con voz seria:
-                ¿Tu padre sabe que estás aquí?
-                Pinocho dudó y respondió:
-                Sí claro Geppetto está muy contento.
-                Entonces, su nariz empezó a crecer sin parar.
+                DespuÃ©s del espectÃ¡culo, Stromboli le preguntÃ³ con voz seria:
+                Â¿Tu padre sabe que estÃ¡s aquÃ­?
+                Pinocho dudÃ³ y respondiÃ³:
+                SÃ­ claro Geppetto estÃ¡ muy contento.
+                Entonces, su nariz empezÃ³ a crecer sin parar.
               </div>
             </div>
           );
@@ -282,8 +282,8 @@ export default function CircusOverlay() {
                 className="sceneCornerBox sceneCornerTopRight"
                 style={{ width: "300px", minHeight: "140px", padding: "0.3rem 0.7rem" }}
               >
-                Stromboli se enfadó al descubrir la mentira y encerró a Pinocho en una jaula.
-                ¡Trabajarás para mí para siempre! gritó.
+                Stromboli se enfadÃ³ al descubrir la mentira y encerrÃ³ a Pinocho en una jaula.
+                Â¡TrabajarÃ¡s para mÃ­ para siempre! gritÃ³.
               </div>
               {tears.map((tear) => (
                 <div
@@ -399,3 +399,5 @@ export default function CircusOverlay() {
     </div>
   );
 }
+
+

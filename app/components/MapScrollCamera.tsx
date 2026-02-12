@@ -313,6 +313,14 @@ export default function MapScrollCamera() {
                 villagePhotos.forEach((photo) => photo.classList.remove("is-active"));
               }
             }
+            if (circusPhotos.length > 0) {
+              const lastIndex = circusPhotos.length - 1;
+              gsap.set(circusPhotos, { autoAlpha: 0 });
+              gsap.set(circusPhotos[lastIndex], { autoAlpha: 1 });
+              circusPhotos.forEach((photo) => photo.classList.remove("is-active"));
+              circusPhotos[lastIndex]?.classList.add("is-active");
+              circusIndex = lastIndex;
+            }
           },
           onLeave: () => {
             if (mapLayer) {

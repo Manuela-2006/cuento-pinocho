@@ -1,10 +1,7 @@
 ﻿"use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import InlineSvg from "./InlineSvg";
-
 const RECT_SELECTOR = "#pinochodemadera, [data-name='pinochodemadera']";
-
 interface Particle {
   id: number;
   x: number;
@@ -15,7 +12,6 @@ interface Particle {
   size: number;
   opacity: number;
 }
-
 interface Flame {
   id: number;
   x: number;
@@ -29,7 +25,6 @@ interface Flame {
   color: number;
   wobble: number;
 }
-
 const SCENE_IMAGES = [
   {
     src: "/seccion1/Escena1.jpg",
@@ -82,44 +77,45 @@ const SCENE_IMAGES = [
     textPosition: "top-left",
     hasGrilloTooltip: true,
   },
+  {
+    src: "/seccion3/Escena1.jpg",
+    alt: "Escena 8",
+    text: "Por la mañana, Geppetto no podía creer lo que veía. \"¡Pinocho! ¡Estás vivo!\", gritó emocionado. Lo abrazó con lágrimas en los ojos.",
+    textPosition: "top-left",
+  },
+  {
+    src: "/seccion3/Escena2.jpg",
+    alt: "Escena 9",
+    text: "Geppetto le regaló ropa nueva y un libro. \"Hoy irás a la escuela\", le dijo. \"Allí aprenderás a ser un niño de verdad\".",
+    textPosition: "top-left",
+  },
 ] as const;
-
 const VIDEO_SRC = "/seccion2/video_1_1770053448255.mp4";
-
 export default function GeppettoOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAfterVideo, setShowAfterVideo] = useState(false);
   const [isFading, setIsFading] = useState(false);
-
   const [grilloTooltipData, setGrilloTooltipData] = useState<{
     show: boolean;
     x: number;
     y: number;
   }>({ show: false, x: 0, y: 0 });
-
   const [particles, setParticles] = useState<Particle[]>([]);
   const [flames, setFlames] = useState<Flame[]>([]);
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
   const particleIdRef = useRef(0);
   const flameIdRef = useRef(0);
-
   const animationFrameRef = useRef<number | undefined>(undefined);
   const flameAnimationFrameRef = useRef<number | undefined>(undefined);
-
   const lastParticleTimeRef = useRef(0);
-
   // 🔥 Generación de llamas
   useEffect(() => {
     const generateFlames = () => {
       const shouldGenerate = Math.random() > 0.2;
       if (!shouldGenerate) return;
-
       const count = Math.random() > 0.6 ? 2 : 1;
       const newFlames: Flame[] = [];
-
       for (let i = 0; i < count; i++) {
         newFlames.push({
           id: flameIdRef.current++,
@@ -135,14 +131,11 @@ export default function GeppettoOverlay() {
           wobble: Math.random() * Math.PI * 2,
         });
       }
-
       setFlames((prev) => [...prev, ...newFlames].slice(-15));
     };
-
     const interval = setInterval(generateFlames, 200);
     return () => clearInterval(interval);
   }, []);
-
   // 🔥 Animación de llamas
   useEffect(() => {
     if (flames.length === 0) {
@@ -152,7 +145,6 @@ export default function GeppettoOverlay() {
       }
       return;
     }
-
     const animate = () => {
       setFlames((prev) =>
         prev
@@ -175,16 +167,13 @@ export default function GeppettoOverlay() {
       );
       flameAnimationFrameRef.current = requestAnimationFrame(animate);
     };
-
     flameAnimationFrameRef.current = requestAnimationFrame(animate);
-
     return () => {
       if (flameAnimationFrameRef.current !== undefined) {
         cancelAnimationFrame(flameAnimationFrameRef.current);
       }
     };
   }, [flames.length > 0]);
-
   // ✨ Reset de vídeo y audio al cerrar
   useEffect(() => {
     if (!isOpen && videoRef.current) {
@@ -196,7 +185,6 @@ export default function GeppettoOverlay() {
       audioRef.current.currentTime = 0;
     }
   }, [isOpen]);
-
   // Eventos externos
   useEffect(() => {
     const handleLeave = () => {
@@ -207,31 +195,25 @@ export default function GeppettoOverlay() {
     window.addEventListener("geppetto-sequence-leave", handleLeave);
     return () => window.removeEventListener("geppetto-sequence-leave", handleLeave);
   }, []);
-
   useEffect(() => {
     const handleActiveIndex = (event: Event) => {
       const detail = (event as CustomEvent<{ index: number }>).detail;
       if (!detail) return;
-
       const photos = Array.from(
         document.querySelectorAll(".geppettoOverlay .scenePhoto")
       ) as HTMLElement[];
-
       const svgIndex = photos.findIndex((photo) =>
         photo.classList.contains("sceneSvg")
       );
-
       if (detail.index === svgIndex) {
         setIsOpen(false);
         setShowAfterVideo(false);
         setIsFading(false);
       }
     };
-
     window.addEventListener("geppetto-active-index", handleActiveIndex);
     return () => window.removeEventListener("geppetto-active-index", handleActiveIndex);
   }, []);
-
   // ✨ Partículas
   useEffect(() => {
     if (particles.length === 0) {
@@ -241,7 +223,6 @@ export default function GeppettoOverlay() {
       }
       return;
     }
-
     const animate = () => {
       setParticles((prev) =>
         prev
@@ -257,56 +238,26 @@ export default function GeppettoOverlay() {
       );
       animationFrameRef.current = requestAnimationFrame(animate);
     };
-
     animationFrameRef.current = requestAnimationFrame(animate);
-
     return () => {
       if (animationFrameRef.current !== undefined) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [particles.length > 0]);
-
   const handleOpen = () => {
-    console.log("🎬 Video play triggered!");
-
     setShowAfterVideo(false);
     setIsFading(false);
     setIsOpen(true);
-
-    // Importante: algunos navegadores son más estables si llamas a play en el siguiente frame
-    requestAnimationFrame(() => {
-      if (videoRef.current) {
-        console.log("📹 Video ref exists, playing...");
-        try {
-          videoRef.current.currentTime = 0;
-          videoRef.current.load(); // ayuda cuando el vídeo no arranca por estado raro
-          void videoRef.current.play().catch((err) =>
-            console.error("❌ Video error:", err)
-          );
-        } catch (e) {
-          console.error("❌ Video exception:", e);
-        }
-      } else {
-        console.error("❌ Video ref is null!");
-      }
-
-      if (audioRef.current) {
-        console.log("🔊 Audio ref exists, playing...");
-        try {
-          audioRef.current.currentTime = 0;
-          void audioRef.current.play().catch((err) =>
-            console.error("❌ Audio error:", err)
-          );
-        } catch (e) {
-          console.error("❌ Audio exception:", e);
-        }
-      } else {
-        console.error("❌ Audio ref is null!");
-      }
-    });
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      void videoRef.current.play().catch((err) => console.error("Video error:", err));
+    }
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      void audioRef.current.play().catch((err) => console.error("Audio error:", err));
+    }
   };
-
   const getTextPositionClass = (position?: string) => {
     switch (position) {
       case "top-left":
@@ -320,25 +271,20 @@ export default function GeppettoOverlay() {
         return "sceneParagraphHero";
     }
   };
-
   const handleMouseMoveGrillo = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-
     const imageWidth = rect.width;
     const imageHeight = rect.height;
-
     const grilloX = imageWidth * 0.82;
     const grilloY = imageHeight * 0.28;
     const grilloSize = 300;
-
     const isOverGrillo =
       x >= grilloX - grilloSize / 2 &&
       x <= grilloX + grilloSize / 2 &&
       y >= grilloY - grilloSize / 2 &&
       y <= grilloY + grilloSize / 2;
-
     if (isOverGrillo) {
       setGrilloTooltipData({
         show: true,
@@ -349,34 +295,27 @@ export default function GeppettoOverlay() {
       setGrilloTooltipData((prev) => ({ ...prev, show: false }));
     }
   };
-
   const handleMouseMoveWood = (event: React.MouseEvent<HTMLDivElement>) => {
     const now = Date.now();
     if (now - lastParticleTimeRef.current < 100) return;
     lastParticleTimeRef.current = now;
-
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-
     const imageWidth = rect.width;
     const imageHeight = rect.height;
-
     const woodX = imageWidth * 0.5;
     const woodY = imageHeight * 0.4;
     const woodWidth = imageWidth * 0.3;
     const woodHeight = imageHeight * 0.4;
-
     const isOverWood =
       x >= woodX - woodWidth / 2 &&
       x <= woodX + woodWidth / 2 &&
       y >= woodY - woodHeight / 2 &&
       y <= woodY + woodHeight / 2;
-
     if (isOverWood) {
       const numParticles = Math.random() > 0.5 ? 1 : 2;
       const newParticles: Particle[] = [];
-
       for (let i = 0; i < numParticles; i++) {
         newParticles.push({
           id: particleIdRef.current++,
@@ -392,7 +331,6 @@ export default function GeppettoOverlay() {
       setParticles((prev) => [...prev, ...newParticles].slice(-30));
     }
   };
-
   const getFlameColor = (colorIndex: number, opacity: number) => {
     const colors = [
       `rgba(255, 140, 40, ${opacity})`,
@@ -401,27 +339,12 @@ export default function GeppettoOverlay() {
     ];
     return colors[colorIndex] ?? colors[0];
   };
-
-  // ✅ Hit-test robusto para SVG: intenta closest(), y si falla, busca el elemento dentro del svg
+  // ✅ Hit-test estricto: solo permite click en el elemento pinochodemadera
   const didClickPinocho = (container: HTMLElement, rawTarget: EventTarget | null) => {
     const targetEl = rawTarget instanceof Element ? rawTarget : null;
-
-    // 1) Camino rápido (tu lógica original)
     const closest = targetEl?.closest?.(RECT_SELECTOR);
-    if (closest) return true;
-
-    // 2) Fallback: si por cómo se embebe el SVG el target no coincide, mira si existe el elemento y estamos dentro del contenedor
-    const svg = container.querySelector("svg");
-    if (!svg) return false;
-
-    const pinocho = svg.querySelector(RECT_SELECTOR);
-    if (!pinocho) return false;
-
-    // Si el pinocho existe, y el click viene de dentro del svg, lo damos por válido
-    // (Puedes endurecer esto si quieres, pero así te aseguras de que funciona)
-    return !!targetEl && (targetEl === svg || svg.contains(targetEl));
+    return !!closest;
   };
-
   return (
     <>
       {/* ✅ IMPORTANTE: añadimos is-active para que el overlay reciba clicks */}
@@ -430,7 +353,11 @@ export default function GeppettoOverlay() {
           if ((image as any).isSplit) {
             if (image.alt === "Escena 1") {
               return (
-                <div key={image.src} className="scenePhoto sceneFrame">
+                <div
+                  key={image.src}
+                  className="scenePhoto sceneFrame"
+                  style={{ transform: "translateY(15px) scale(1.02)" }}
+                >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div className="sceneCornerBox sceneParagraphHero">
                     Geppetto era un señor mayor, con barba blanca y ojos dulces, que vivía
@@ -443,14 +370,17 @@ export default function GeppettoOverlay() {
                 </div>
               );
             }
-
             if (image.alt === "Escena 3" && (image as any).customTexts) {
               const customTexts = (image as any).customTexts as {
                 topLeft: string;
                 bottomRight: string;
               };
               return (
-                <div key={image.src} className="scenePhoto sceneFrame">
+                <div
+                  key={image.src}
+                  className="scenePhoto sceneFrame"
+                  style={{ transform: "translateY(15px) scale(1.02)" }}
+                >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div className="sceneCornerBox sceneCornerTopLeft">{customTexts.topLeft}</div>
                   <div className="sceneCornerBox sceneParagraphHero">{customTexts.bottomRight}</div>
@@ -458,42 +388,39 @@ export default function GeppettoOverlay() {
               );
             }
           }
-
           if ((image as any).isSvg) {
             const isVideo = !!(image as any).isVideo;
-
             return (
               <div
                 key={image.src}
                 className={`scenePhoto sceneSvg${isVideo ? " is-video" : ""}${
                   isOpen ? " is-playing" : ""
-                }${isFading ? " is-fading" : ""}`}
-                // ✅ Mejor que onClick para “gesto de usuario” (móviles + policies)
+                }${isFading ? " is-fading" : ""}${
+                  image.src === "/seccion2/Escena1.svg" ? " is-hada-wand" : ""
+                }`}
+                // ✅ Mejor que onClick para "gesto de usuario" (móviles + policies)
                 onPointerDown={(event) => {
-                  console.log("🖱️ SVG clicked!");
-                  if (showAfterVideo) {
-                    console.log("⏹️ Blocked: showAfterVideo is true");
-                    return;
-                  }
-
+                  if (showAfterVideo) return;
                   const container = event.currentTarget as HTMLElement;
-
                   const ok = didClickPinocho(container, event.target);
-                  console.log("🎯 didClickPinocho:", ok);
-
                   if (ok) handleOpen();
                 }}
                 // ✅ Sin tocar tu CSS, aseguramos que el vídeo absolute se encaja aquí
-                style={{ position: "relative" }}
+                style={{
+                  position: "relative",
+                  transform:
+                    image.src === "/seccion2/Escena1.svg"
+                      ? "translateY(-40px) scale(1.02)"
+                      : "scale(1.02)",
+                }}
+                
               >
                 <InlineSvg src={image.src} className="sceneSvgInner" />
-
                 {(image as any).text && !showAfterVideo && (
                   <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
                     {(image as any).text}
                   </div>
                 )}
-
                 {isVideo && (
                   <>
                     <video
@@ -527,7 +454,6 @@ export default function GeppettoOverlay() {
               </div>
             );
           }
-
           if ((image as any).text) {
             if ((image as any).hasMagicWood && (image as any).hasFire) {
               return (
@@ -535,13 +461,17 @@ export default function GeppettoOverlay() {
                   key={image.src}
                   className="scenePhoto sceneFrame"
                   onMouseMove={handleMouseMoveWood}
-                  style={{ position: "relative", overflow: "hidden" }}
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    // AJUSTE VERTICAL DE ESCENA 2
+                    transform: "translateY(270px) scale(1.02)",
+                  }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
                     {(image as any).text}
                   </div>
-
                   {flames.map((flame) => (
                     <div
                       key={flame.id}
@@ -576,7 +506,6 @@ export default function GeppettoOverlay() {
                 </div>
               );
             }
-
             if ((image as any).hasGrilloTooltip) {
               return (
                 <div
@@ -584,12 +513,12 @@ export default function GeppettoOverlay() {
                   className="scenePhoto sceneFrame"
                   onMouseMove={handleMouseMoveGrillo}
                   onMouseLeave={() => setGrilloTooltipData((prev) => ({ ...prev, show: false }))}
+                  style={{ transform: "translateY(15px) scale(1.02)" }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
                     {(image as any).text}
                   </div>
-
                   <div
                     className="grilloTooltip"
                     style={{
@@ -607,9 +536,13 @@ export default function GeppettoOverlay() {
                 </div>
               );
             }
-
+            // Todas las demás imágenes con texto (incluyendo seccion3/Escena1 y Escena2)
             return (
-              <div key={image.src} className="scenePhoto sceneFrame">
+              <div
+                key={image.src}
+                className="scenePhoto sceneFrame"
+                style={{ transform: "translateY(15px) scale(1.02)" }}
+              >
                 <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                 <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
                   {(image as any).text}
@@ -617,11 +550,17 @@ export default function GeppettoOverlay() {
               </div>
             );
           }
-
-          return <img key={image.src} className="scenePhoto" src={image.src} alt={image.alt} />;
+          // Imágenes sin texto ni propiedades especiales
+          return (
+            <img
+              key={image.src}
+              className="scenePhoto"
+              src={image.src}
+              alt={image.alt}
+            />
+          );
         })}
       </div>
-
       {particles.map((particle) => (
         <div
           key={particle.id}

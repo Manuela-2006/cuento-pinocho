@@ -49,6 +49,49 @@ body {
   opacity: 0;
 }
 
+.villageOverlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  z-index: 4;
+  pointer-events: auto;
+  opacity: 0;
+}
+
+.villageOverlay.is-active {
+  display: grid;
+  pointer-events: auto;
+}
+
+.circusOverlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  z-index: 4;
+  pointer-events: auto;
+  opacity: 0;
+}
+
+.circusOverlay.is-active {
+  display: grid;
+  pointer-events: auto;
+}
+
+.forestOverlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  pointer-events: auto;
+  opacity: 0;
+}
+
+.forestOverlay.is-active {
+  pointer-events: auto;
+}
 .geppettoOverlay.is-active {
   pointer-events: auto;
 }
@@ -351,6 +394,14 @@ body {
   top: -35px;      /* Más arriba */
 }
 
+/* Habilitar hover para áreas interactivas en Escena4.svg (Village) */
+.villageOverlay svg #Grillo1,
+.villageOverlay svg [data-name="Grillo1"],
+.villageOverlay svg #musica1,
+.villageOverlay svg [data-name="musica1"] {
+  pointer-events: all;
+}
+
 /* Contenedor de las secciones de scroll */
 .story {
   position: relative;
@@ -374,6 +425,21 @@ body {
   align-items: center;
 }
 
+.village-sequence {
+  height: 300vh;
+  align-items: center;
+}
+
+.circus-sequence {
+  height: 500vh;
+  align-items: center;
+}
+
+.forest-sequence {
+  height: 200vh;
+  align-items: center;
+}
+
 .sequenceHint {
   background: rgba(255, 255, 255, 0.85);
   border-radius: 999px;
@@ -394,6 +460,81 @@ body {
   pointer-events: auto;
   max-width: 600px;
   text-align: center;
+}
+
+@keyframes confettiRise {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-80px) rotate(140deg);
+    opacity: 0;
+  }
+}
+
+.fairyParticle {
+  position: absolute;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(210, 240, 255, 1) 45%, rgba(140, 210, 255, 1) 70%);
+  border-radius: 999px;
+  filter: blur(0px);
+  animation-name: fairySparkle, fairyTwinkle;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1, infinite;
+  animation-duration: inherit, 0.5s;
+  animation-delay: inherit, 0s;
+  pointer-events: none;
+  box-shadow:
+    0 0 10px rgba(240, 250, 255, 1),
+    0 0 18px rgba(180, 230, 255, 0.95),
+    0 0 28px rgba(120, 210, 255, 0.9),
+    0 0 40px rgba(80, 190, 255, 0.85);
+}
+
+@keyframes fairySparkle {
+  0% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-40px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes fairyTwinkle {
+  0% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.tearDrop {
+  position: absolute;
+  background: rgba(140, 200, 255, 0.7);
+  border-radius: 999px;
+  filter: blur(0.2px);
+  animation-name: tearFall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+
+@keyframes tearFall {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(60px) scale(0.9);
+    opacity: 0;
+  }
 }
 
 /* Ocultar markers de ScrollTrigger sin afectar su funcionamiento */

@@ -181,6 +181,34 @@ export default function MapScrollCamera() {
         }
       };
 
+      const setFinalMapMode = (active: boolean) => {
+        document.body.classList.toggle("final-map-active", active);
+        if (active && section9Overlay) {
+          gsap.set(section9Overlay, { autoAlpha: 0, display: "none" });
+          section9Overlay.classList.remove("is-active");
+        }
+        if (active && section9Photos.length > 0) {
+          gsap.set(section9Photos, { autoAlpha: 0 });
+          section9Photos.forEach((photo) => photo.classList.remove("is-active"));
+        }
+        if (active && section8Overlay) {
+          gsap.set(section8Overlay, { autoAlpha: 0, display: "none" });
+          section8Overlay.classList.remove("is-active");
+        }
+        if (active && section8Photos.length > 0) {
+          gsap.set(section8Photos, { autoAlpha: 0 });
+          section8Photos.forEach((photo) => photo.classList.remove("is-active"));
+        }
+        if (active && section7Overlay) {
+          gsap.set(section7Overlay, { autoAlpha: 0 });
+          section7Overlay.classList.remove("is-active");
+        }
+        if (active && section7Photos.length > 0) {
+          gsap.set(section7Photos, { autoAlpha: 0 });
+          section7Photos.forEach((photo) => photo.classList.remove("is-active"));
+        }
+      };
+
       const initialViewBox = {
         x: svg.viewBox.baseVal.x,
         y: svg.viewBox.baseVal.y,
@@ -260,6 +288,8 @@ export default function MapScrollCamera() {
       const sections = document.querySelectorAll(".scene");
 
       sections.forEach((section) => {
+        if ((section as HTMLElement).classList.contains("final-map-sequence")) return;
+
         const zoneIdAttr = (section as HTMLElement).dataset.zone;
         if (!zoneIdAttr) return;
 
@@ -1080,6 +1110,7 @@ export default function MapScrollCamera() {
           end: "bottom center",
           scrub: 0.6,
           onEnter: () => {
+            setFinalMapMode(false);
             setSection9Mode(true);
             setSection8Mode(false);
             setSection7Mode(false);
@@ -1104,6 +1135,7 @@ export default function MapScrollCamera() {
             section9Photos[section9Index]?.classList.add("is-active");
           },
           onEnterBack: () => {
+            setFinalMapMode(false);
             setSection9Mode(true);
             setSection8Mode(false);
             setSection7Mode(false);
@@ -1178,6 +1210,7 @@ export default function MapScrollCamera() {
           window.scrollY >= section9Start &&
           document.body.classList.contains("zone-geppetto-active")
         ) {
+          setFinalMapMode(false);
           document.body.classList.remove("section8-sequence-active");
           setSection9Mode(true);
           setSection8Mode(false);
@@ -1206,6 +1239,37 @@ export default function MapScrollCamera() {
           }
         }
       }
+
+      const finalMapSequence = document.querySelector(
+        ".final-map-sequence"
+      ) as HTMLElement | null;
+
+      if (finalMapSequence) {
+        const finalMapTrigger = ScrollTrigger.create({
+          trigger: finalMapSequence,
+          start: "top center",
+          end: "bottom center",
+          scrub: 0.6,
+          onEnter: () => {
+            setCurrentZoneClass("zone-mapa");
+            moveToZone(null, 1);
+            setFinalMapMode(true);
+          },
+          onEnterBack: () => {
+            setCurrentZoneClass("zone-mapa");
+            moveToZone(null, 1);
+            setFinalMapMode(true);
+          },
+          onLeave: () => {
+            setFinalMapMode(false);
+          },
+          onLeaveBack: () => {
+            setFinalMapMode(false);
+          },
+        });
+
+        triggers.push(finalMapTrigger);
+      }
     };
 
     animationFrameId = requestAnimationFrame(tryInit);
@@ -1218,6 +1282,7 @@ export default function MapScrollCamera() {
       document.body.classList.remove("section8-active");
       document.body.classList.remove("section9-active");
       document.body.classList.remove("section8-sequence-active");
+      document.body.classList.remove("final-map-active");
       document.body.classList.remove(
         "zone-mapa-active",
         "zone-geppetto-active",

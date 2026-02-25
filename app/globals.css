@@ -139,6 +139,467 @@ body:not(.zone-island-active) .islandOverlay .scenePhoto {
   pointer-events: auto;
 }
 
+.section7DustScene {
+  position: absolute;
+  width: min(85vw, 960px);
+  aspect-ratio: 1408 / 736;
+  max-height: 80vh;
+}
+
+.section7SceneSvgHost {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: auto;
+}
+
+.section7SceneSvg {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.section7SceneSvg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: auto;
+}
+
+.section7BallenaVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 8;
+}
+
+.section7BallenaVideo.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.section7DustLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.section7DustParticle {
+  position: absolute;
+  left: var(--dust-x);
+  top: var(--dust-y);
+  width: var(--dust-size);
+  height: var(--dust-size);
+  border-radius: 999px;
+  background: rgba(242, 234, 214, 0.96);
+  opacity: var(--dust-opacity);
+  filter: blur(0.15px) drop-shadow(0 0 2px rgba(245, 233, 205, 0.45));
+  animation: section7DustFloat var(--dust-duration) linear infinite;
+  animation-delay: var(--dust-delay);
+}
+
+@keyframes section7DustFloat {
+  0% {
+    transform: translate3d(0, -10px, 0);
+    opacity: calc(var(--dust-opacity) * 0.3);
+  }
+  35% {
+    opacity: var(--dust-opacity);
+  }
+  100% {
+    transform: translate3d(var(--dust-drift), 34px, 0);
+    opacity: calc(var(--dust-opacity) * 0.3);
+  }
+}
+
+.section8WaterLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.section8WaterParticle {
+  position: absolute;
+  left: var(--water-x);
+  top: var(--water-y);
+  width: var(--water-size);
+  height: calc(var(--water-size) * 1.9);
+  border-radius: 999px;
+  background: rgba(224, 244, 255, 0.9);
+  opacity: var(--water-opacity);
+  filter: blur(0.2px) drop-shadow(0 0 2px rgba(176, 225, 255, 0.8));
+  animation: section8WaterFloat var(--water-duration) ease-in-out infinite;
+  animation-delay: var(--water-delay);
+}
+
+@keyframes section8WaterFloat {
+  0% {
+    transform: translate3d(0, 8px, 0) scale(0.95);
+    opacity: calc(var(--water-opacity) * 0.55);
+  }
+  35% {
+    transform: translate3d(var(--water-drift-x), calc(var(--water-drift-y) * -0.45), 0) scale(1);
+    opacity: var(--water-opacity);
+  }
+  100% {
+    transform: translate3d(calc(var(--water-drift-x) * -0.6), var(--water-drift-y), 0) scale(0.92);
+    opacity: calc(var(--water-opacity) * 0.45);
+  }
+}
+
+.section8SmokeLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.section8SmokeParticle {
+  position: absolute;
+  left: var(--smoke-x);
+  top: var(--smoke-y);
+  width: var(--smoke-size);
+  height: var(--smoke-size);
+  border-radius: 999px;
+  background: rgba(210, 210, 210, 0.9);
+  opacity: var(--smoke-opacity);
+  filter: blur(2px) drop-shadow(0 0 5px rgba(185, 185, 185, 0.45));
+  animation: section8SmokeRise var(--smoke-duration) ease-in-out infinite;
+  animation-delay: var(--smoke-delay);
+}
+
+@keyframes section8SmokeRise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.72);
+    opacity: calc(var(--smoke-opacity) * 0.25);
+  }
+  40% {
+    transform: translate3d(var(--smoke-drift-x), calc(var(--smoke-rise-y) * -0.35), 0) scale(1);
+    opacity: var(--smoke-opacity);
+  }
+  100% {
+    transform: translate3d(calc(var(--smoke-drift-x) * 1.4), calc(var(--smoke-rise-y) * -1), 0) scale(1.45);
+    opacity: 0;
+  }
+}
+
+.section8BoatDriftImage {
+  animation: section8BoatDrift 6.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes section8BoatDrift {
+  0% {
+    transform: translate3d(0px, 0px, 0) scale(1.04);
+  }
+  25% {
+    transform: translate3d(4px, -6px, 0) scale(1.04);
+  }
+  50% {
+    transform: translate3d(6px, 0px, 0) scale(1.04);
+  }
+  75% {
+    transform: translate3d(4px, 6px, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(0px, 0px, 0) scale(1.04);
+  }
+}
+
+.section8RainLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.section8RainDrop {
+  position: absolute;
+  left: var(--rain-x);
+  top: var(--rain-y);
+  width: var(--rain-width);
+  height: var(--rain-length);
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    rgba(235, 246, 255, 0) 0%,
+    rgba(235, 246, 255, 0.8) 35%,
+    rgba(235, 246, 255, 0.2) 100%
+  );
+  opacity: var(--rain-opacity);
+  filter: blur(0.2px);
+  transform: rotate(28deg);
+  animation: section8RainFall var(--rain-duration) linear infinite;
+  animation-delay: var(--rain-delay);
+}
+
+@keyframes section8RainFall {
+  0% {
+    transform: translate3d(calc(var(--rain-drift-x) * 1.1), -16vh, 0) rotate(28deg);
+    opacity: calc(var(--rain-opacity) * 0.15);
+  }
+  12% {
+    opacity: var(--rain-opacity);
+  }
+  100% {
+    transform: translate3d(calc(var(--rain-drift-x) * -1.9), 120vh, 0) rotate(28deg);
+    opacity: calc(var(--rain-opacity) * 0.2);
+  }
+}
+
+.section8ThunderFlash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 20%, rgba(220, 240, 255, 0.28) 0%, rgba(220, 240, 255, 0) 55%);
+  opacity: 0;
+  animation: section8ThunderFlash 5.8s linear infinite;
+}
+
+.section8LightningLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.section8LightningBolt {
+  position: absolute;
+  left: var(--bolt-left);
+  top: var(--bolt-top);
+  width: 34px;
+  height: var(--bolt-height);
+  transform: rotate(var(--bolt-angle));
+  opacity: 0;
+  animation: section8LightningBolt var(--bolt-duration) linear infinite;
+  animation-delay: var(--bolt-delay);
+}
+
+.section8LightningSegment {
+  position: absolute;
+  left: 50%;
+  top: var(--seg-top);
+  width: 2px;
+  height: var(--seg-height);
+  margin-left: calc(var(--seg-x) - 1px);
+  border-radius: 999px;
+  background: linear-gradient(
+    to bottom,
+    rgba(246, 252, 255, 0.96) 0%,
+    rgba(165, 223, 255, 0.88) 55%,
+    rgba(246, 252, 255, 0.2) 100%
+  );
+  box-shadow:
+    0 0 6px rgba(205, 238, 255, 0.92),
+    0 0 16px rgba(166, 220, 255, 0.65);
+  transform: rotate(var(--seg-angle));
+}
+
+.section8LightningBranch {
+  width: 1.5px;
+  opacity: 0.88;
+  filter: saturate(0.95);
+}
+
+@keyframes section8ThunderFlash {
+  0% {
+    opacity: 0;
+  }
+  7% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.3;
+  }
+  9% {
+    opacity: 0.08;
+  }
+  10% {
+    opacity: 0.36;
+  }
+  12% {
+    opacity: 0;
+  }
+  63% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.26;
+  }
+  65.2% {
+    opacity: 0.04;
+  }
+  66% {
+    opacity: 0.32;
+  }
+  68% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes section8LightningBolt {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0;
+  }
+  8.4% {
+    opacity: 0.95;
+  }
+  8.9% {
+    opacity: 0.2;
+  }
+  9.4% {
+    opacity: 0.85;
+  }
+  10.5% {
+    opacity: 0;
+  }
+  63% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.92;
+  }
+  64.6% {
+    opacity: 0.18;
+  }
+  65.2% {
+    opacity: 0.86;
+  }
+  66.6% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.section9GoldParticle {
+  position: absolute;
+  background: radial-gradient(circle, rgba(255, 255, 245, 1) 0%, rgba(255, 244, 180, 1) 42%, rgba(255, 213, 88, 0.98) 72%);
+  border-radius: 999px;
+  filter: blur(0px) saturate(1.18) brightness(1.12);
+  opacity: 0.96;
+  pointer-events: none;
+  animation-name: section9GoldSparkle, section9GoldTwinkle;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1, infinite;
+  animation-duration: inherit, 0.48s;
+  animation-delay: inherit, 0s;
+  box-shadow:
+    0 0 12px rgba(255, 246, 195, 1),
+    0 0 22px rgba(255, 225, 124, 0.98),
+    0 0 36px rgba(255, 203, 74, 0.94),
+    0 0 54px rgba(255, 188, 48, 0.86);
+  mix-blend-mode: screen;
+}
+
+@keyframes section9GoldSparkle {
+  0% {
+    transform: translateY(0) scale(0.88);
+    opacity: 0.96;
+  }
+  100% {
+    transform: translateY(-42px) scale(1.02);
+    opacity: 0;
+  }
+}
+
+@keyframes section9GoldTwinkle {
+  0% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.section9Scene3Glow {
+  position: absolute;
+  left: 45%;
+  top: 44%;
+  width: 160px;
+  height: 160px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(circle, rgba(255, 243, 181, 0.34) 0%, rgba(255, 220, 122, 0.2) 42%, rgba(255, 186, 70, 0) 74%);
+  mix-blend-mode: screen;
+  filter: blur(0.4px);
+}
+
+.section9Scene3Particle {
+  position: absolute;
+  z-index: 1;
+  border-radius: 999px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(255, 255, 246, 1) 0%, rgba(255, 236, 160, 0.98) 44%, rgba(255, 202, 84, 0.92) 72%);
+  box-shadow:
+    0 0 8px rgba(255, 244, 197, 0.95),
+    0 0 18px rgba(255, 220, 118, 0.86),
+    0 0 28px rgba(255, 188, 74, 0.7);
+  mix-blend-mode: screen;
+  animation-name: section9Scene3Float, section9Scene3Twinkle;
+  animation-timing-function: ease-out, ease-in-out;
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1, infinite;
+  animation-duration: inherit, 0.62s;
+  animation-delay: inherit, 0s;
+}
+
+@keyframes section9Scene3Float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.82);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(var(--section9-drift-x, 0px), var(--section9-drift-y, -30px), 0) scale(1.08);
+    opacity: 0;
+  }
+}
+
+@keyframes section9Scene3Twinkle {
+  0% {
+    filter: brightness(1.04);
+  }
+  50% {
+    filter: brightness(1.22);
+  }
+  100% {
+    filter: brightness(1.02);
+  }
+}
+
 .section8Overlay {
   position: fixed;
   inset: 0;
@@ -791,7 +1252,8 @@ body.section9-active .section9Overlay .scenePhoto {
   top: 0;
   left: 0;
   right: 0;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 90px;
   z-index: 50;
   pointer-events: none;
@@ -799,6 +1261,8 @@ body.section9-active .section9Overlay .scenePhoto {
   align-items: center;
   gap: 0;
   padding: 0 18px;
+  box-sizing: border-box;
+  overflow: hidden;
   --nose-color: #c88352;
   --nose-color-dark: #9c5a30;
   --nose-color-light: #e0aa7a;
@@ -808,12 +1272,13 @@ body.section9-active .section9Overlay .scenePhoto {
 
 .pinochoFace {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 128px;
+  height: 128px;
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   overflow: visible;
+  z-index: 2;
 }
 
 .pinochoFace img {
@@ -821,39 +1286,100 @@ body.section9-active .section9Overlay .scenePhoto {
   height: 100%;
   display: block;
   object-fit: contain;
+  transform: scaleX(-1);
 }
 
 .noseTrack {
   position: relative;
   flex: 1;
-  height: 14px;
-  margin-right: 10px;
-  margin-top: var(--nose-offset);
+  min-width: 0;
+  height: 10px;
+  margin-left: -44px;
+  margin-top: calc(var(--nose-offset) + 3px);
   border-radius: 999px;
-  background:
-    linear-gradient(180deg, #d89a5f, #8a4f27);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
-    inset -1px 0 3px rgba(0, 0, 0, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.28);
-  opacity: 0.9;
+  background: transparent;
+  box-shadow: none;
+  opacity: 1;
+  z-index: 4;
 }
 
 .noseFill {
   position: absolute;
-  right: 0;
+  left: 0;
   top: 0;
   height: 100%;
   width: 100%;
   transform: scaleX(var(--scroll-progress, 0));
-  transform-origin: right;
-  border-radius: 0 999px 999px 0;
-  clip-path: polygon(100% 0, 6% 0, 0 50%, 6% 100%, 100% 100%);
+  transform-origin: left;
+  border-radius: 999px;
   background:
-    linear-gradient(180deg, #c9793f 0%, #9b5a2f 45%, #7b4322 100%);
+    linear-gradient(
+      90deg,
+      #c67b3d 0%,
+      #d9904e 23%,
+      #cb8043 49%,
+      #d79a5d 76%,
+      #c37336 100%
+    ),
+    repeating-linear-gradient(
+      94deg,
+      rgba(86, 45, 20, 0.11) 0 1px,
+      rgba(86, 45, 20, 0) 1px 15px
+    ),
+    repeating-linear-gradient(
+      86deg,
+      rgba(120, 72, 40, 0.08) 0 2px,
+      rgba(120, 72, 40, 0) 2px 22px
+    );
   box-shadow:
-    inset -1px -1px 3px rgba(0, 0, 0, 0.3),
-    0 3px 6px rgba(0, 0, 0, 0.4);
+    inset 0 1px 0 rgba(255, 224, 182, 0.22),
+    inset 0 -1px 0 rgba(88, 46, 22, 0.28);
+  overflow: hidden;
+}
+.noseFill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    linear-gradient(
+      93deg,
+      transparent 0 14%,
+      rgba(70, 35, 14, 0.34) 14.05% 14.35%,
+      transparent 14.4% 34%,
+      rgba(70, 35, 14, 0.3) 34.2% 34.45%,
+      transparent 34.6% 58%,
+      rgba(70, 35, 14, 0.26) 58.2% 58.45%,
+      transparent 58.6% 80%,
+      rgba(70, 35, 14, 0.24) 80.2% 80.45%,
+      transparent 80.5% 100%
+    ),
+    radial-gradient(
+      135% 85% at 12% 50%,
+      rgba(255, 214, 154, 0.16) 0%,
+      rgba(255, 214, 154, 0.06) 24%,
+      rgba(109, 57, 26, 0.05) 38%,
+      rgba(255, 214, 154, 0.04) 54%,
+      rgba(109, 57, 26, 0.07) 70%,
+      transparent 100%
+    );
+  mix-blend-mode: multiply;
+}
+.noseFill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 223, 176, 0.24) 0%,
+      rgba(255, 223, 176, 0.05) 28%,
+      transparent 55%,
+      rgba(58, 28, 10, 0.12) 100%
+    );
 }
 
 .islandScene2Tooltip {
@@ -874,3 +1400,16 @@ body.section9-active .section9Overlay .scenePhoto {
   left: auto;
   right: 40px;
 }
+
+body.intro-lock {
+  overflow: hidden !important;
+}
+
+body.intro-lock .scrollNose {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+

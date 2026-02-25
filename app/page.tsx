@@ -8,10 +8,12 @@ import Section7Overlay from "./components/Section7Overlay";
 import Section8Overlay from "./components/Section8Overlay";
 import Section9Overlay from "./components/Section9Overlay";
 import MapScrollCamera from "./components/MapScrollCamera";
+import IntroGate from "./components/IntroGate";
 
 export default function Page() {
   return (
-    <main>
+    <IntroGate>
+      <main>
       {/* MAPA FIJO */}
       <div className="mapViewport">
         <div className="mapLayer">
@@ -68,6 +70,8 @@ export default function Page() {
         <section className="scene final-map-sequence" data-zone="zone-mapa" />
       </div>
     </main>
+    </IntroGate>
   );
 }
+
 

@@ -474,7 +474,18 @@ export default function MapScrollCamera() {
         gsap.set(circusPhotos, { autoAlpha: 0 });
         gsap.set(circusPhotos[0], { autoAlpha: 1 });
         let circusIndex = 0;
+        let lockFirstSceneUntil = 0;
         circusPhotos[0]?.classList.add("is-active");
+
+        const setCircusPhotoByIndex = (nextIndex: number) => {
+          const safeIndex = Math.max(0, Math.min(circusPhotos.length - 1, nextIndex));
+          if (safeIndex === circusIndex) return;
+          gsap.to(circusPhotos[circusIndex], { autoAlpha: 0, duration: 0.3 });
+          gsap.to(circusPhotos[safeIndex], { autoAlpha: 1, duration: 0.3 });
+          circusPhotos[circusIndex]?.classList.remove("is-active");
+          circusPhotos[safeIndex]?.classList.add("is-active");
+          circusIndex = safeIndex;
+        };
 
         const circusTrigger = ScrollTrigger.create({
           trigger: circusSequence,
@@ -487,6 +498,12 @@ export default function MapScrollCamera() {
             }
             gsap.to(circusOverlay, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
             circusOverlay.classList.add("is-active");
+            lockFirstSceneUntil = Date.now() + 550;
+            gsap.set(circusPhotos, { autoAlpha: 0 });
+            circusPhotos.forEach((photo) => photo.classList.remove("is-active"));
+            gsap.set(circusPhotos[0], { autoAlpha: 1 });
+            circusPhotos[0]?.classList.add("is-active");
+            circusIndex = 0;
             if (villageOverlay) {
               gsap.to(villageOverlay, { autoAlpha: 0, duration: 0.2, ease: "power2.out" });
               villageOverlay.classList.remove("is-active");
@@ -542,18 +559,17 @@ export default function MapScrollCamera() {
             }
           },
           onUpdate: (self) => {
-            const nextIndex = Math.min(
+            let nextIndex = Math.min(
               circusPhotos.length - 1,
               Math.floor(self.progress * circusPhotos.length)
             );
 
-            if (nextIndex !== circusIndex) {
-              gsap.to(circusPhotos[circusIndex], { autoAlpha: 0, duration: 0.3 });
-              gsap.to(circusPhotos[nextIndex], { autoAlpha: 1, duration: 0.3 });
-              circusPhotos[circusIndex]?.classList.remove("is-active");
-              circusPhotos[nextIndex]?.classList.add("is-active");
-              circusIndex = nextIndex;
+            // Asegura que Escena1 se vea al entrar hacia delante.
+            if (Date.now() < lockFirstSceneUntil) {
+              nextIndex = 0;
             }
+
+            setCircusPhotoByIndex(nextIndex);
           },
           onRefresh: (self) => {
             if (self.isActive || self.progress > 0) {

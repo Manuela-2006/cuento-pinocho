@@ -32,11 +32,11 @@ export default function ScrollNose() {
 
   return (
     <div className="scrollNose" aria-hidden="true">
-      <div className="noseTrack">
-        <div className="noseFill" />
-      </div>
       <div className="pinochoFace">
         <img src="/pinochomini.svg" alt="Pinocho" />
+      </div>
+      <div className="noseTrack">
+        <div className="noseFill" />
       </div>
     </div>
   );

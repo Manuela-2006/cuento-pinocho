@@ -111,6 +111,33 @@ export default function VillageOverlay() {
     return () => clearInterval(checkInterval);
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    const interval = setInterval(() => {
+      const overlay = document.querySelector(".villageOverlay") as HTMLElement | null;
+      const isActive = !!overlay?.classList.contains("is-active");
+      const isVillageZoneActive = document.body.classList.contains("zone-village-active");
+      if (isActive && isVillageZoneActive) return;
+
+      setIsHoveringMusic(false);
+      setGrilloTooltipData({ show: false, x: 0, y: 0 });
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+        video.muted = true;
+      }
+    }, 220);
+
+    return () => {
+      clearInterval(interval);
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+        video.muted = true;
+      }
+    };
+  }, []);
+
   const getTextPositionClass = (position?: string) => {
     switch (position) {
       case "top-left":
@@ -196,25 +223,6 @@ export default function VillageOverlay() {
                 )}
                 
                 {/* ✅ Indicador visual si el audio no está desbloqueado */}
-                {!audioUnlocked && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "10px",
-                      background: "rgba(0,0,0,0.7)",
-                      color: "white",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      pointerEvents: "none",
-                      zIndex: 10,
-                    }}
-                  >
-                    🔊 Click para activar audio
-                  </div>
-                )}
-                
                 <video
                   ref={videoRef}
                   className="sceneSvgVideo"

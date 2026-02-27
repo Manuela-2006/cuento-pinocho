@@ -40,6 +40,13 @@ export default function Section9Overlay() {
   >([]);
   const goldIdRef = useRef(0);
   const scene3IdRef = useRef(0);
+  const scene2FrameRef = useRef<HTMLDivElement | null>(null);
+  const scene3FrameAudioRef = useRef<HTMLDivElement | null>(null);
+  const baritaAudioRef = useRef<HTMLAudioElement | null>(null);
+  const baritaPlayedRef = useRef(false);
+  const flautaAudioRef = useRef<HTMLAudioElement | null>(null);
+  const flautaPlayedRef = useRef(false);
+  const scene3WasActiveRef = useRef(false);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -72,6 +79,109 @@ export default function Section9Overlay() {
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ effectsEnabled?: boolean }>).detail;
+      if (detail?.effectsEnabled === false) {
+        baritaPlayedRef.current = false;
+        if (baritaAudioRef.current) {
+          baritaAudioRef.current.pause();
+          baritaAudioRef.current.currentTime = 0;
+        }
+        flautaPlayedRef.current = false;
+        if (flautaAudioRef.current) {
+          flautaAudioRef.current.pause();
+          flautaAudioRef.current.currentTime = 0;
+        }
+      }
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const node = scene2FrameRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry || !entry.isIntersecting) {
+          baritaPlayedRef.current = false;
+          if (baritaAudioRef.current) {
+            baritaAudioRef.current.pause();
+            baritaAudioRef.current.currentTime = 0;
+          }
+        }
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const frame = scene3FrameAudioRef.current;
+      const overlay = document.querySelector(".section9Overlay") as HTMLElement | null;
+      const isActive =
+        !!overlay?.classList.contains("is-active") &&
+        !!frame?.classList.contains("is-active") &&
+        document.body.classList.contains("section9-active") &&
+        document.body.classList.contains("zone-geppetto-active");
+
+      if (!isActive) {
+        scene3WasActiveRef.current = false;
+        flautaPlayedRef.current = false;
+        if (flautaAudioRef.current) {
+          flautaAudioRef.current.pause();
+          flautaAudioRef.current.currentTime = 0;
+        }
+        return;
+      }
+
+      if (!scene3WasActiveRef.current) {
+        scene3WasActiveRef.current = true;
+        flautaPlayedRef.current = false;
+      }
+
+      if (flautaPlayedRef.current) return;
+      if (document.body.dataset.effectsEnabled === "false") return;
+      const audio = flautaAudioRef.current;
+      if (!audio) return;
+
+      audio.currentTime = 0;
+      void audio
+        .play()
+        .then(() => {
+          flautaPlayedRef.current = true;
+        })
+        .catch(() => {
+          flautaPlayedRef.current = false;
+        });
+    }, 220);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const playFlautaOnce = () => {
+    if (document.body.dataset.effectsEnabled === "false") return;
+    if (flautaPlayedRef.current) return;
+    const audio = flautaAudioRef.current;
+    if (!audio) return;
+    audio.currentTime = 0;
+    void audio
+      .play()
+      .then(() => {
+        flautaPlayedRef.current = true;
+      })
+      .catch(() => {
+        flautaPlayedRef.current = false;
+      });
+  };
+
   const spawnScene2GoldParticles = (event: React.PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -98,6 +208,22 @@ export default function Section9Overlay() {
     });
 
     setGoldParticles((prev) => [...prev, ...newPieces].slice(-90));
+
+    const effectsEnabled = document.body.dataset.effectsEnabled !== "false";
+    if (effectsEnabled && !baritaPlayedRef.current) {
+      const audio = baritaAudioRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        void audio
+          .play()
+          .then(() => {
+            baritaPlayedRef.current = true;
+          })
+          .catch(() => {
+            baritaPlayedRef.current = false;
+          });
+      }
+    }
 
     newPieces.forEach((piece) => {
       const ttl = (piece.duration + piece.delay) * 1000;
@@ -128,12 +254,14 @@ export default function Section9Overlay() {
         ) : image.src === "/seccion9/Escena2.jpg" ? (
           <div
             key={image.src}
+            ref={scene2FrameRef}
             className="scenePhoto sceneFrame"
             style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}
             onPointerMove={spawnScene2GoldParticles}
             onPointerEnter={spawnScene2GoldParticles}
           >
             <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+            <audio ref={baritaAudioRef} src="/Sonidos/Barita.mp3" preload="auto" />
             {goldParticles.map((piece) => (
               <div
                 key={piece.id}
@@ -161,10 +289,13 @@ export default function Section9Overlay() {
         ) : image.src === "/seccion9/Escena3.jpg" ? (
           <div
             key={image.src}
+            ref={scene3FrameAudioRef}
             className="scenePhoto sceneFrame"
             style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}
+            onPointerEnter={playFlautaOnce}
           >
             <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+            <audio ref={flautaAudioRef} src="/Sonidos/Flauta.mp3" preload="auto" />
             <div className="section9Scene3Glow" aria-hidden="true" />
             {scene3Particles.map((piece) => (
               <div

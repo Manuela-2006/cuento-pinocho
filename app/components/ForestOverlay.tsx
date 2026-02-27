@@ -40,8 +40,13 @@ export default function ForestOverlay() {
   const sparkleIdRef = useRef(0);
   const tearIdRef = useRef(0);
   const coinIdRef = useRef(0);
+  const scene5FrameRef = useRef<HTMLDivElement | null>(null);
+  const scene5LaughPlayedRef = useRef(false);
+  const scene5WasActiveRef = useRef(false);
   const moneyAudioRef = useRef<HTMLAudioElement | null>(null);
+  const baritaAudioRef = useRef<HTMLAudioElement | null>(null);
   const foxLaughAudioRef = useRef<HTMLAudioElement | null>(null);
+  const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
 
   const triggerScene2CoinSparkles = () => {
     const newSparkles = Array.from({ length: 14 }).map(() => {
@@ -67,13 +72,22 @@ export default function ForestOverlay() {
     });
   };
 
+  const playBaritaSound = () => {
+    if (!effectsEnabled()) return;
+    if (!baritaAudioRef.current) return;
+    baritaAudioRef.current.currentTime = 0;
+    void baritaAudioRef.current.play().catch(() => undefined);
+  };
+
   const playMoneySound = () => {
+    if (!effectsEnabled()) return;
     if (!moneyAudioRef.current) return;
     moneyAudioRef.current.currentTime = 0;
     void moneyAudioRef.current.play().catch(() => undefined);
   };
 
   const playFoxLaughSound = () => {
+    if (!effectsEnabled()) return;
     if (!foxLaughAudioRef.current) return;
     foxLaughAudioRef.current.currentTime = 0;
     void foxLaughAudioRef.current.play().catch(() => undefined);
@@ -129,6 +143,36 @@ export default function ForestOverlay() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const frame = scene5FrameRef.current;
+      if (!frame) return;
+
+      const isActive = frame.classList.contains("is-active");
+      if (!isActive) {
+        scene5WasActiveRef.current = false;
+        scene5LaughPlayedRef.current = false;
+        return;
+      }
+
+      if (!scene5WasActiveRef.current) {
+        scene5WasActiveRef.current = true;
+        scene5LaughPlayedRef.current = false;
+      }
+
+      if (scene5LaughPlayedRef.current) return;
+      if (!effectsEnabled()) return;
+      if (!foxLaughAudioRef.current) return;
+
+      foxLaughAudioRef.current.currentTime = 0;
+      void foxLaughAudioRef.current.play().then(() => {
+        scene5LaughPlayedRef.current = true;
+      }).catch(() => undefined);
+    }, 220);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="forestOverlay" aria-hidden="true">
       {FOREST_IMAGES.map((image) => {
@@ -177,7 +221,10 @@ export default function ForestOverlay() {
               <button
                 type="button"
                 aria-label="Moneda"
-                onClick={triggerScene2CoinSparkles}
+                onClick={() => {
+                  triggerScene2CoinSparkles();
+                  playMoneySound();
+                }}
                 style={{
                   position: "absolute",
                   left: "42%",
@@ -193,6 +240,7 @@ export default function ForestOverlay() {
                   zIndex: 4,
                 }}
               />
+              <audio ref={moneyAudioRef} src="/Sonidos/Dinero.mp3" preload="auto" />
               <div className="sceneCornerBox sceneCornerTopRight" style={{ width: "300px" }}>
                 Conocemos una forma de hacerte rico le susurró el Zorro y le contó que había un árbol en que que si plantabas una moneda crecían muchas más.
               </div>
@@ -312,6 +360,7 @@ export default function ForestOverlay() {
           return (
             <div
               key={image.src}
+              ref={scene5FrameRef}
               className="scenePhoto sceneFrame"
               style={{ transform: "translateY(20px) scale(1.02)" }}
             >
@@ -347,7 +396,7 @@ export default function ForestOverlay() {
               <button
                 type="button"
                 aria-label="Bolsa de dinero"
-                onClick={playMoneySound}
+                onClick={playBaritaSound}
                 style={{
                   position: "absolute",
                   left: "80%",
@@ -404,7 +453,7 @@ export default function ForestOverlay() {
                   <span className="thoughtTail" aria-hidden="true" />
                 </div>
               )}
-              <audio ref={moneyAudioRef} src="/Sonidos/Dinero.mp3" preload="auto" />
+              <audio ref={baritaAudioRef} src="/Sonidos/Barita.mp3" preload="auto" />
             </div>
           );
         }

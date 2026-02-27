@@ -75,6 +75,7 @@ function Section8Scene2({ showSection8Images }: { showSection8Images: boolean })
   const isVideoActiveRef = useRef(false);
   const [showVideo, setShowVideo] = useState(false);
   const BALLENA_SELECTOR = "#Ballena1, [data-name='Ballena1']";
+  const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
 
   const playVideo = () => {
     if (isVideoActiveRef.current) return;
@@ -82,6 +83,8 @@ function Section8Scene2({ showSection8Images }: { showSection8Images: boolean })
     setShowVideo(true);
     const video = videoRef.current;
     if (!video) return;
+    video.muted = !effectsEnabled();
+    video.volume = 1;
     video.currentTime = 0;
     void video.play().catch(() => undefined);
   };
@@ -94,6 +97,7 @@ function Section8Scene2({ showSection8Images }: { showSection8Images: boolean })
     if (!video) return;
     video.pause();
     video.currentTime = 0;
+    video.muted = true;
   };
 
   const isOverBallena = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -155,6 +159,17 @@ export default function Section8Overlay() {
   const [showSection8Images, setShowSection8Images] = useState(false);
   const [showScene1Tooltip, setShowScene1Tooltip] = useState(false);
   const [showScene3Tooltip, setShowScene3Tooltip] = useState(false);
+  const scene5FrameRef = useRef<HTMLDivElement | null>(null);
+  const fireAudioRef = useRef<HTMLAudioElement | null>(null);
+  const fireStopTimeoutRef = useRef<number | null>(null);
+  const scene5WasActiveRef = useRef(false);
+  const scene5PlayedRef = useRef(false);
+  const scene6FrameRef = useRef<HTMLDivElement | null>(null);
+  const rainThunderAudioRef = useRef<HTMLAudioElement | null>(null);
+  const rainThunderStopTimeoutRef = useRef<number | null>(null);
+  const scene6WasActiveRef = useRef(false);
+  const scene6PlayedRef = useRef(false);
+  const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
 
   useEffect(() => {
     const computeVisibility = () => {
@@ -177,6 +192,140 @@ export default function Section8Overlay() {
       window.removeEventListener("pageshow", computeVisibility);
     };
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const frame = scene5FrameRef.current;
+      if (!frame) return;
+
+      const overlay = document.querySelector(".section8Overlay") as HTMLElement | null;
+      const overlayActive = !!overlay?.classList.contains("is-active");
+      const section8Active = document.body.classList.contains("section8-active");
+      const section8SequenceActive = document.body.classList.contains("section8-sequence-active");
+      const zoneIslandActive = document.body.classList.contains("zone-island-active");
+      const inSection9 = document.body.classList.contains("section9-active");
+      const sceneActive = frame.classList.contains("is-active");
+      const active =
+        showSection8Images &&
+        overlayActive &&
+        section8Active &&
+        section8SequenceActive &&
+        zoneIslandActive &&
+        !inSection9 &&
+        sceneActive;
+
+      if (!active) {
+        scene5WasActiveRef.current = false;
+        scene5PlayedRef.current = false;
+        if (fireStopTimeoutRef.current) {
+          window.clearTimeout(fireStopTimeoutRef.current);
+          fireStopTimeoutRef.current = null;
+        }
+        if (fireAudioRef.current) {
+          fireAudioRef.current.pause();
+          fireAudioRef.current.currentTime = 0;
+        }
+        return;
+      }
+
+      if (!scene5WasActiveRef.current) {
+        scene5WasActiveRef.current = true;
+        scene5PlayedRef.current = false;
+      }
+
+      if (scene5PlayedRef.current) return;
+      if (!effectsEnabled()) return;
+      if (!fireAudioRef.current) return;
+
+      fireAudioRef.current.currentTime = 0;
+      void fireAudioRef.current.play().then(() => {
+        scene5PlayedRef.current = true;
+        if (fireStopTimeoutRef.current) {
+          window.clearTimeout(fireStopTimeoutRef.current);
+        }
+        fireStopTimeoutRef.current = window.setTimeout(() => {
+          if (!fireAudioRef.current) return;
+          fireAudioRef.current.pause();
+          fireAudioRef.current.currentTime = 0;
+          fireStopTimeoutRef.current = null;
+        }, 8000);
+      }).catch(() => undefined);
+    }, 220);
+
+    return () => {
+      clearInterval(interval);
+      if (fireStopTimeoutRef.current) {
+        window.clearTimeout(fireStopTimeoutRef.current);
+      }
+    };
+  }, [showSection8Images]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const frame = scene6FrameRef.current;
+      if (!frame) return;
+
+      const overlay = document.querySelector(".section8Overlay") as HTMLElement | null;
+      const overlayActive = !!overlay?.classList.contains("is-active");
+      const section8Active = document.body.classList.contains("section8-active");
+      const section8SequenceActive = document.body.classList.contains("section8-sequence-active");
+      const zoneIslandActive = document.body.classList.contains("zone-island-active");
+      const inSection9 = document.body.classList.contains("section9-active");
+      const sceneActive = frame.classList.contains("is-active");
+      const active =
+        showSection8Images &&
+        overlayActive &&
+        section8Active &&
+        section8SequenceActive &&
+        zoneIslandActive &&
+        !inSection9 &&
+        sceneActive;
+
+      if (!active) {
+        scene6WasActiveRef.current = false;
+        scene6PlayedRef.current = false;
+        if (rainThunderStopTimeoutRef.current) {
+          window.clearTimeout(rainThunderStopTimeoutRef.current);
+          rainThunderStopTimeoutRef.current = null;
+        }
+        if (rainThunderAudioRef.current) {
+          rainThunderAudioRef.current.pause();
+          rainThunderAudioRef.current.currentTime = 0;
+        }
+        return;
+      }
+
+      if (!scene6WasActiveRef.current) {
+        scene6WasActiveRef.current = true;
+        scene6PlayedRef.current = false;
+      }
+
+      if (scene6PlayedRef.current) return;
+      if (!effectsEnabled()) return;
+      if (!rainThunderAudioRef.current) return;
+
+      rainThunderAudioRef.current.currentTime = 0;
+      void rainThunderAudioRef.current.play().then(() => {
+        scene6PlayedRef.current = true;
+        if (rainThunderStopTimeoutRef.current) {
+          window.clearTimeout(rainThunderStopTimeoutRef.current);
+        }
+        rainThunderStopTimeoutRef.current = window.setTimeout(() => {
+          if (!rainThunderAudioRef.current) return;
+          rainThunderAudioRef.current.pause();
+          rainThunderAudioRef.current.currentTime = 0;
+          rainThunderStopTimeoutRef.current = null;
+        }, 8000);
+      }).catch(() => undefined);
+    }, 220);
+
+    return () => {
+      clearInterval(interval);
+      if (rainThunderStopTimeoutRef.current) {
+        window.clearTimeout(rainThunderStopTimeoutRef.current);
+      }
+    };
+  }, [showSection8Images]);
 
   return (
     <div className="section8Overlay" aria-hidden="true" style={{ pointerEvents: showSection8Images ? "auto" : "none" }}>
@@ -345,6 +494,7 @@ export default function Section8Overlay() {
         ) : image.src === "/seccion8/Escena5.jpg" ? (
           <div
             key={image.src}
+            ref={scene5FrameRef}
             className="scenePhoto sceneFrame"
             style={{
               transform: "translateY(20px) scale(1.02)",
@@ -353,6 +503,7 @@ export default function Section8Overlay() {
             }}
           >
             <img className="sceneFrameImage section8BoatDriftImage" src={image.src} alt={image.alt} />
+            <audio ref={fireAudioRef} src="/Sonidos/Fuego.mp3" preload="auto" />
             <div className="section8SmokeLayer" aria-hidden="true">
               {SCENE5_SMOKE_PARTICLES.map((particle) => (
                 <span
@@ -386,6 +537,7 @@ export default function Section8Overlay() {
         ) : image.src === "/seccion8/Escena6.jpg" ? (
           <div
             key={image.src}
+            ref={scene6FrameRef}
             className="scenePhoto sceneFrame"
             style={{
               transform: "translateY(20px) scale(1.02)",
@@ -394,6 +546,7 @@ export default function Section8Overlay() {
             }}
           >
             <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+            <audio ref={rainThunderAudioRef} src="/Sonidos/Lluviaytrueno.mp3" preload="auto" />
             <div className="section8ThunderFlash" aria-hidden="true" />
             <div className="section8RainLayer" aria-hidden="true">
               {SCENE6_RAIN_PARTICLES.map((drop) => (

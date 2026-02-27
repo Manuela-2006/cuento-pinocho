@@ -190,10 +190,55 @@ function Section7Scene2() {
 
 function Section7Scene3() {
   const [showPepitoTooltip, setShowPepitoTooltip] = useState(false);
+  const sceneRef = useRef<HTMLDivElement | null>(null);
+  const cryAudioRef = useRef<HTMLAudioElement | null>(null);
+  const wasActiveRef = useRef(false);
+  const playedRef = useRef(false);
+  const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const frame = sceneRef.current;
+      if (!frame) return;
+
+      const overlay = document.querySelector(".section7Overlay") as HTMLElement | null;
+      const overlayActive = !!overlay?.classList.contains("is-active");
+      const sceneActive = frame.classList.contains("is-active");
+      const section7Active = document.body.classList.contains("section7-active");
+      const active = overlayActive && section7Active && sceneActive;
+
+      if (!active) {
+        wasActiveRef.current = false;
+        playedRef.current = false;
+        if (cryAudioRef.current) {
+          cryAudioRef.current.pause();
+          cryAudioRef.current.currentTime = 0;
+        }
+        return;
+      }
+
+      if (!wasActiveRef.current) {
+        wasActiveRef.current = true;
+        playedRef.current = false;
+      }
+
+      if (playedRef.current) return;
+      if (!effectsEnabled()) return;
+      if (!cryAudioRef.current) return;
+
+      cryAudioRef.current.currentTime = 0;
+      void cryAudioRef.current.play().then(() => {
+        playedRef.current = true;
+      }).catch(() => undefined);
+    }, 220);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
-    <div className="scenePhoto sceneFrame" style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}>
+    <div ref={sceneRef} className="scenePhoto sceneFrame" style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}>
       <img className="sceneFrameImage" src="/seccion7/Escena3.jpg" alt="Escena 3" />
+      <audio ref={cryAudioRef} src="/Sonidos/Llorar.mp3" preload="auto" />
 
       <div className="section7DustLayer" aria-hidden="true">
         {SCENE1_DUST_PARTICLES.map((particle) => (

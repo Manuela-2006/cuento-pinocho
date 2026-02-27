@@ -3,6 +3,7 @@ import "lenis/dist/lenis.css";
 import "./globals.css";
 import LenisProvider from "./components/LenisProvider";
 import ScrollNose from "./components/ScrollNose";
+import AudioControlPanel from "./components/AudioControlPanel";
 
 export const metadata: Metadata = {
   title: "Cuento Pinocho",
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <LenisProvider />
         <ScrollNose />
+        <AudioControlPanel />
         {children}
       </body>
     </html>

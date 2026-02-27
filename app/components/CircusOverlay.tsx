@@ -52,10 +52,11 @@ export default function CircusOverlay() {
     x: number;
     y: number;
   }>({ show: false, x: 0, y: 0 });
-  const [fairySoundEnabled, setFairySoundEnabled] = useState(false);
+  const scene5FrameRef = useRef<HTMLDivElement | null>(null);
   const escena4AudioRef = useRef<HTMLAudioElement | null>(null);
   const fairyAudioRef = useRef<HTMLAudioElement | null>(null);
-  const lastFairySoundRef = useRef(0);
+  const fairyPlayedRef = useRef(false);
+  const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -82,6 +83,44 @@ export default function CircusOverlay() {
     return () => {
       clearInterval(interval);
     };
+  }, []);
+
+  useEffect(() => {
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ effectsEnabled?: boolean }>).detail;
+      if (detail?.effectsEnabled === false) {
+        fairyPlayedRef.current = false;
+        if (fairyAudioRef.current) {
+          fairyAudioRef.current.pause();
+          fairyAudioRef.current.currentTime = 0;
+        }
+      }
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const node = scene5FrameRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry || !entry.isIntersecting) {
+          fairyPlayedRef.current = false;
+          if (fairyAudioRef.current) {
+            fairyAudioRef.current.pause();
+            fairyAudioRef.current.currentTime = 0;
+          }
+        }
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
   }, []);
 
   const spawnConfetti = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -131,14 +170,20 @@ export default function CircusOverlay() {
 
     if (!withinX || !withinY) return;
 
-    if (fairySoundEnabled) {
-      const now = Date.now();
-      if (fairyAudioRef.current && now - lastFairySoundRef.current > 600) {
-        lastFairySoundRef.current = now;
-        fairyAudioRef.current.muted = false;
-        fairyAudioRef.current.volume = 0.9;
-        fairyAudioRef.current.currentTime = 0;
-        void fairyAudioRef.current.play().catch(() => undefined);
+    if (effectsEnabled() && !fairyPlayedRef.current) {
+      const audio = fairyAudioRef.current;
+      if (audio) {
+        audio.muted = false;
+        audio.volume = 0.9;
+        audio.currentTime = 0;
+        void audio
+          .play()
+          .then(() => {
+            fairyPlayedRef.current = true;
+          })
+          .catch(() => {
+            fairyPlayedRef.current = false;
+          });
       }
     }
 
@@ -322,6 +367,7 @@ export default function CircusOverlay() {
           return (
             <div
               key={image.src}
+              ref={scene5FrameRef}
               className="scenePhoto sceneFrame"
               style={{ transform: "translateY(20px) scale(1.02)" }}
               onPointerMove={spawnFairyParticles}
@@ -336,29 +382,6 @@ export default function CircusOverlay() {
                 Te daré otra oportunidad, dijo.
                 Pero debes prometer decir siempre la verdad.
               </div>
-              <button
-                type="button"
-                className="sceneCornerBox"
-                style={{
-                  left: "16px",
-                  top: "16px",
-                  right: "auto",
-                  bottom: "auto",
-                  width: "220px",
-                  minHeight: "auto",
-                  padding: "0.4rem 0.7rem",
-                  cursor: "pointer",
-                  background: fairySoundEnabled
-                    ? "rgba(200, 230, 255, 0.9)"
-                    : "rgba(248, 237, 219, 0.9)",
-                }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setFairySoundEnabled(true);
-                }}
-              >
-                {fairySoundEnabled ? "Sonido del Hada activo" : "Activar sonido del Hada"}
-              </button>
               <div
                 className="sceneCornerBox sceneCornerBottomLeft"
                 style={{ width: "300px", padding: "0.05rem 0.8rem" }}
@@ -399,5 +422,3 @@ export default function CircusOverlay() {
     </div>
   );
 }
-
-

@@ -125,6 +125,15 @@ body:not(.zone-island-active) .islandOverlay .scenePhoto {
   opacity: 0 !important;
 }
 
+body:not(.zone-village-active) .villageOverlay {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+body:not(.zone-village-active) .villageOverlay .scenePhoto {
+  opacity: 0 !important;
+}
+
 .section7Overlay {
   position: fixed;
   inset: 0;
@@ -1081,43 +1090,48 @@ body.section9-active .section9Overlay .scenePhoto {
   pointer-events: none;
 }
 
+/* Ritmo uniforme: mismo tramo de scroll por escena en todas las secuencias. */
+:root {
+  --story-scene-step: 120vh;
+}
+
 .geppetto-sequence {
-  height: 600vh;
+  height: calc(var(--story-scene-step) * 9);
   align-items: center;
 }
 
 .village-sequence {
-  height: 300vh;
+  height: calc(var(--story-scene-step) * 2);
   align-items: center;
 }
 
 .circus-sequence {
-  height: 500vh;
+  height: calc(var(--story-scene-step) * 5);
   align-items: center;
 }
 
 .forest-sequence {
-  height: 200vh;
+  height: calc(var(--story-scene-step) * 5);
   align-items: center;
 }
 
 .island-sequence {
-  height: 100vh;
+  height: calc(var(--story-scene-step) * 8);
   align-items: center;
 }
 
 .section7-sequence {
-  height: 100vh;
+  height: calc(var(--story-scene-step) * 3);
   align-items: center;
 }
 
 .section8-sequence {
-  height: 100vh;
+  height: calc(var(--story-scene-step) * 7);
   align-items: center;
 }
 
 .section9-sequence {
-  height: 400vh;
+  height: calc(var(--story-scene-step) * 4);
   align-items: center;
 }
 
@@ -1410,6 +1424,132 @@ body.intro-lock .scrollNose {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+.audioControlDock {
+  position: fixed;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.audioControlShell {
+  width: 38px;
+  height: 118px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-left: 0;
+  border-radius: 0 12px 12px 0;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  padding: 6px 6px 6px 6px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  transition: width 0.2s ease;
+}
+
+.audioControlShell.is-open {
+  width: 116px;
+}
+
+.audioControlHandle {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  margin-left: 8px;
+  transition: margin-left 0.2s ease;
+}
+
+.audioControlArrow {
+  display: block;
+  transform: translateY(-1px);
+}
+
+.audioControlArrowIcon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.audioControlArrowIcon.is-open {
+  transform: rotate(180deg);
+}
+
+.audioControlActions {
+  display: grid;
+  gap: 6px;
+  width: 0;
+  flex: 0 0 0;
+  overflow: hidden;
+  margin-right: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, width 0.2s ease, flex-basis 0.2s ease, margin-right 0.2s ease;
+}
+
+.audioControlShell.is-open .audioControlActions {
+  width: 40px;
+  flex: 0 0 40px;
+  margin-left: 12px;
+  margin-right: 10px;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.audioControlShell.is-open .audioControlHandle {
+  margin-left: 12px;
+}
+
+.audioControlBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 1);
+  color: #475569;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.audioControlBtn.is-on {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.44);
+  color: #1d4ed8;
+}
+
+.audioControlBtn.is-off {
+  background: rgba(248, 250, 252, 1);
+  border-color: rgba(15, 23, 42, 0.16);
+  color: #64748b;
+}
+
+.audioControlIconImage {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
 }
 
 

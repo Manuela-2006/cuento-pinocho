@@ -22,6 +22,8 @@ const SECTION9_IMAGES = [
 ] as const;
 
 export default function Section9Overlay() {
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeSection9Index, setActiveSection9Index] = useState<number | null>(null);
   const [goldParticles, setGoldParticles] = useState<
     { id: number; x: number; y: number; size: number; duration: number; delay: number }[]
   >([]);
@@ -42,6 +44,11 @@ export default function Section9Overlay() {
   const scene3IdRef = useRef(0);
   const scene2FrameRef = useRef<HTMLDivElement | null>(null);
   const scene3FrameAudioRef = useRef<HTMLDivElement | null>(null);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena4VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
   const baritaAudioRef = useRef<HTMLAudioElement | null>(null);
   const baritaPlayedRef = useRef(false);
   const flautaAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -80,8 +87,19 @@ export default function Section9Overlay() {
   }, []);
 
   useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
     const handleAudioSettings = (event: Event) => {
-      const detail = (event as CustomEvent<{ effectsEnabled?: boolean }>).detail;
+      const detail = (event as CustomEvent<{ effectsEnabled?: boolean; voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+      } else {
+        syncVoiceFromStorage();
+      }
       if (detail?.effectsEnabled === false) {
         baritaPlayedRef.current = false;
         if (baritaAudioRef.current) {
@@ -99,6 +117,107 @@ export default function Section9Overlay() {
     window.addEventListener("pinocho-audio-settings", handleAudioSettings);
     return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
   }, []);
+
+  useEffect(() => {
+    const handleSection9Index = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveSection9Index(detail.index);
+    };
+
+    const handleSection9Leave = () => {
+      setActiveSection9Index(null);
+    };
+
+    window.addEventListener("section9-active-index", handleSection9Index);
+    window.addEventListener("section9-sequence-leave", handleSection9Leave);
+    return () => {
+      window.removeEventListener("section9-active-index", handleSection9Index);
+      window.removeEventListener("section9-sequence-leave", handleSection9Leave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const escena4Audio = escena4VoiceRef.current;
+    const activeAudio =
+      activeSection9Index === 0
+        ? escena1Audio
+        : activeSection9Index === 1
+          ? escena2Audio
+          : activeSection9Index === 2
+            ? escena3Audio
+            : activeSection9Index === 3
+              ? escena4Audio
+          : null;
+
+    [escena1Audio, escena2Audio, escena3Audio, escena4Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeSection9Index, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeSection9Index === 0
+          ? escena1VoiceRef.current
+          : activeSection9Index === 1
+            ? escena2VoiceRef.current
+            : activeSection9Index === 2
+              ? escena3VoiceRef.current
+              : activeSection9Index === 3
+                ? escena4VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeSection9Index === 0 ||
+          activeSection9Index === 1 ||
+          activeSection9Index === 2 ||
+          activeSection9Index === 3) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeSection9Index, voiceOverEnabled]);
 
   useEffect(() => {
     const node = scene2FrameRef.current;
@@ -246,7 +365,7 @@ export default function Section9Overlay() {
             <div className="sceneCornerBox sceneCornerTopRight" style={{ width: "360px" }}>
               Geppetto acostó a Pinocho con cuidado en la cama.
               <br />
-              Hijo mío susurró con lágrimas en los ojos.
+              "Hijo mío", susurró con lágrimas en los ojos.
               <br />
               El taller estaba en silencio.
             </div>
@@ -281,7 +400,7 @@ export default function Section9Overlay() {
               <br />
               Una luz brillante llenó la habitación.
               <br />
-              Has demostrado amor verdadero y valentía dijo.
+              "Has demostrado amor verdadero y valentía", dijo.
               <br />
               Y tocó a Pinocho con su varita.
             </div>
@@ -320,7 +439,7 @@ export default function Section9Overlay() {
               <br />
               La madera desapareció.
               <br />
-              Y por primera vez,
+              Y, por primera vez,
               <br />
               Pinocho respiró como un niño de verdad.
             </div>
@@ -352,6 +471,30 @@ export default function Section9Overlay() {
           />
         )
       )}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion8/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion8/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion8/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena4VoiceRef}
+        src="/Sonidos/voz/Seccion8/Escena4.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </div>
   );
 }

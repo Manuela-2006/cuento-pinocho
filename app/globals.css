@@ -1441,7 +1441,9 @@ body.intro-lock .scrollNose {
   border: 1px solid rgba(15, 23, 42, 0.14);
   border-left: 0;
   border-radius: 0 12px 12px 0;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
   padding: 6px 6px 6px 6px;
   display: flex;
@@ -1457,14 +1459,11 @@ body.intro-lock .scrollNose {
 
 .audioControlHandle {
   width: 30px;
-  height: 30px;
-  border: 1px solid rgba(15, 23, 42, 0.14);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #475569;
-  font-weight: 600;
-  font-size: 13px;
-  line-height: 1;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #3c2414;
   padding: 0;
   cursor: pointer;
   display: grid;
@@ -1474,22 +1473,21 @@ body.intro-lock .scrollNose {
   transition: margin-left 0.2s ease;
 }
 
-.audioControlArrow {
-  display: block;
-  transform: translateY(-1px);
-}
-
-.audioControlArrowIcon {
-  width: 26px;
-  height: 26px;
-  object-fit: contain;
-  display: block;
-  transform: rotate(0deg);
-  transition: transform 0.2s ease;
-}
-
-.audioControlArrowIcon.is-open {
-  transform: rotate(180deg);
+.audioControlHandleLabel {
+  writing-mode: horizontal-tb;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  transform-origin: center;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 600;
+  font-family: "Times New Roman", Times, serif;
+  color: #a06c3f;
+  user-select: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
 }
 
 .audioControlActions {
@@ -1517,6 +1515,10 @@ body.intro-lock .scrollNose {
 
 .audioControlShell.is-open .audioControlHandle {
   margin-left: 12px;
+}
+
+.audioControlShell.is-open .audioControlHandleLabel {
+  left: 72%;
 }
 
 .audioControlBtn {

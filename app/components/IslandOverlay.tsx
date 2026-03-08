@@ -38,8 +38,19 @@ const ISLAND_IMAGES = [
 ] as const;
 
 export default function IslandOverlay() {
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeIslandIndex, setActiveIslandIndex] = useState<number | null>(null);
   const [showScene3PepitoTooltip, setShowScene3PepitoTooltip] = useState(false);
   const [showScene8PepitoTooltip, setShowScene8PepitoTooltip] = useState(false);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena4VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena5VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena6VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena7VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena8VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
   const scene1FrameRef = useRef<HTMLDivElement | null>(null);
   const parkAudioRef = useRef<HTMLAudioElement | null>(null);
   const parkAudioStopTimeoutRef = useRef<number | null>(null);
@@ -93,6 +104,152 @@ export default function IslandOverlay() {
     if (frame.getClientRects().length === 0) return false;
     return frame.classList.contains("is-active");
   };
+
+  useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+        return;
+      }
+      syncVoiceFromStorage();
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const handleIslandIndex = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveIslandIndex(detail.index);
+    };
+
+    const handleIslandLeave = () => {
+      setActiveIslandIndex(null);
+    };
+
+    window.addEventListener("island-active-index", handleIslandIndex);
+    window.addEventListener("island-sequence-leave", handleIslandLeave);
+    return () => {
+      window.removeEventListener("island-active-index", handleIslandIndex);
+      window.removeEventListener("island-sequence-leave", handleIslandLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const escena4Audio = escena4VoiceRef.current;
+    const escena5Audio = escena5VoiceRef.current;
+    const escena6Audio = escena6VoiceRef.current;
+    const escena7Audio = escena7VoiceRef.current;
+    const escena8Audio = escena8VoiceRef.current;
+    const activeAudio =
+      activeIslandIndex === 0
+        ? escena1Audio
+        : activeIslandIndex === 1
+          ? escena2Audio
+          : activeIslandIndex === 2
+            ? escena3Audio
+            : activeIslandIndex === 3
+              ? escena4Audio
+              : activeIslandIndex === 4
+                ? escena5Audio
+                : activeIslandIndex === 5
+                  ? escena6Audio
+                  : activeIslandIndex === 6
+                    ? escena7Audio
+                    : activeIslandIndex === 7
+                      ? escena8Audio
+          : null;
+
+    [escena1Audio, escena2Audio, escena3Audio, escena4Audio, escena5Audio, escena6Audio, escena7Audio, escena8Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeIslandIndex, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeIslandIndex === 0
+          ? escena1VoiceRef.current
+          : activeIslandIndex === 1
+            ? escena2VoiceRef.current
+            : activeIslandIndex === 2
+              ? escena3VoiceRef.current
+              : activeIslandIndex === 3
+                ? escena4VoiceRef.current
+                : activeIslandIndex === 4
+                  ? escena5VoiceRef.current
+                  : activeIslandIndex === 5
+                    ? escena6VoiceRef.current
+                    : activeIslandIndex === 6
+                      ? escena7VoiceRef.current
+                      : activeIslandIndex === 7
+                        ? escena8VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeIslandIndex === 0 ||
+          activeIslandIndex === 1 ||
+          activeIslandIndex === 2 ||
+          activeIslandIndex === 3 ||
+          activeIslandIndex === 4 ||
+          activeIslandIndex === 5 ||
+          activeIslandIndex === 6 ||
+          activeIslandIndex === 7) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeIslandIndex, voiceOverEnabled]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -308,11 +465,9 @@ export default function IslandOverlay() {
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
               <audio ref={parkAudioRef} src="/Sonidos/Parquedejuegos.mp3" preload="auto" />
               <div className="sceneCornerBox sceneCornerTopLeft" style={{ width: "360px" }}>
-                Pinocho llegó a la Isla de los Juegos.
+                Pinocho llegó a la Isla de los Juegos. Había montañas rusas, dulces y niños riendo por todas partes.
                 <br />
-                Había montañas rusas, dulces y niños riendo por todas partes.
-                <br />
-                ¡Aquí no hay escuela ni obligaciones! le dijo el Cochero.
+                "¡Aquí no hay escuela ni obligaciones!", le dijo el Cochero.
                 <br />
                 Pinocho miró todo con asombro.
               </div>
@@ -559,6 +714,54 @@ export default function IslandOverlay() {
 
         return null;
       })}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena4VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena4.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena5VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena5.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena6VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena6.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena7VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena7.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena8VoiceRef}
+        src="/Sonidos/voz/Seccion5/Escena8.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </div>
   );
 }

@@ -5,15 +5,117 @@ import Image from "next/image";
 
 const EFFECTS_KEY = "pinocho:effects-enabled";
 const VOICE_OVER_KEY = "pinocho:voiceover-enabled";
+const EFFECTS_VOLUME = 0.35;
+const RAIN_THUNDER_VOLUME = 0.12;
+const FIRE_VOLUME = 1;
+const YAY_VOLUME = 0.07;
+const PARK_VOLUME = 0.1;
+const LAUGH_VOLUME = 0.18;
+const CRY_VOLUME = 0.16;
+const VOICE_OVER_VOLUME = 1;
+const VIDEO_AUDIO_VOLUME = 0.45;
+
+function getAudioPath(node: HTMLAudioElement) {
+  const rawSrc = node.currentSrc || node.src;
+  if (!rawSrc) return "";
+  try {
+    return new URL(rawSrc, window.location.origin).pathname.toLowerCase();
+  } catch {
+    return rawSrc.toLowerCase();
+  }
+}
+
+function isSonidosAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.includes("/sonidos/");
+}
+
+function isVoiceOverAudio(node: HTMLAudioElement) {
+  if (node.dataset.audioChannel === "voiceover") return true;
+  const path = getAudioPath(node);
+  return path.includes("/sonidos/voz/");
+}
+
+function isRainThunderAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.endsWith("/sonidos/lluviaytrueno.mp3");
+}
+
+function isFireAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.endsWith("/sonidos/fuego.mp3");
+}
+
+function isYayAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.endsWith("/sonidos/yay.mp3");
+}
+
+function isParkAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.endsWith("/sonidos/parquedejuegos.mp3");
+}
+
+function isLaughAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.endsWith("/sonidos/risa.mp3");
+}
+
+function isCryAudio(node: HTMLAudioElement) {
+  const path = getAudioPath(node);
+  return path.endsWith("/sonidos/llorar.mp3");
+}
+
+function applyAudioMix() {
+  const audios = document.querySelectorAll<HTMLAudioElement>("audio");
+  const videos = document.querySelectorAll<HTMLVideoElement>("video");
+
+  audios.forEach((node) => {
+    if (!isSonidosAudio(node)) return;
+    if (isVoiceOverAudio(node)) {
+      node.volume = VOICE_OVER_VOLUME;
+      return;
+    }
+    if (isRainThunderAudio(node)) {
+      node.volume = RAIN_THUNDER_VOLUME;
+      return;
+    }
+    if (isYayAudio(node)) {
+      node.volume = YAY_VOLUME;
+      return;
+    }
+    if (isParkAudio(node)) {
+      node.volume = PARK_VOLUME;
+      return;
+    }
+    if (isLaughAudio(node)) {
+      node.volume = LAUGH_VOLUME;
+      return;
+    }
+    if (isCryAudio(node)) {
+      node.volume = CRY_VOLUME;
+      return;
+    }
+    node.volume = isFireAudio(node) ? FIRE_VOLUME : EFFECTS_VOLUME;
+  });
+
+  videos.forEach((node) => {
+    if (node.muted) return;
+    node.volume = VIDEO_AUDIO_VOLUME;
+  });
+}
 
 function applyEffectsEnabled(enabled: boolean) {
   document.body.dataset.effectsEnabled = enabled ? "true" : "false";
 
   const audios = document.querySelectorAll<HTMLAudioElement>("audio");
+  const effectAudios = Array.from(audios).filter(
+    (node) => node.dataset.audioChannel !== "voiceover"
+  );
   const videos = document.querySelectorAll<HTMLVideoElement>("video");
 
   if (!enabled) {
-    audios.forEach((node) => {
+    effectAudios.forEach((node) => {
       node.pause();
       node.currentTime = 0;
       node.muted = true;
@@ -27,9 +129,11 @@ function applyEffectsEnabled(enabled: boolean) {
 
   // On enable: allow effects again, but do not unmute every video globally.
   // Each scene should explicitly unmute/play its own media when needed.
-  audios.forEach((node) => {
+  effectAudios.forEach((node) => {
     node.muted = false;
   });
+
+  applyAudioMix();
 }
 
 function emitAudioSettings(effectsEnabled: boolean, voiceOverEnabled: boolean) {
@@ -70,6 +174,53 @@ export default function AudioControlPanel() {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [effectsEnabled, settingsReady]);
+
+  useEffect(() => {
+    if (!settingsReady) return;
+
+    applyAudioMix();
+
+    const handleMediaPlay = (event: Event) => {
+      const node = event.target;
+      if (node instanceof HTMLAudioElement) {
+        if (!isSonidosAudio(node)) return;
+        if (isVoiceOverAudio(node)) {
+          node.volume = VOICE_OVER_VOLUME;
+          return;
+        }
+        if (isRainThunderAudio(node)) {
+          node.volume = RAIN_THUNDER_VOLUME;
+          return;
+        }
+        if (isYayAudio(node)) {
+          node.volume = YAY_VOLUME;
+          return;
+        }
+        if (isParkAudio(node)) {
+          node.volume = PARK_VOLUME;
+          return;
+        }
+        if (isLaughAudio(node)) {
+          node.volume = LAUGH_VOLUME;
+          return;
+        }
+        if (isCryAudio(node)) {
+          node.volume = CRY_VOLUME;
+          return;
+        }
+        node.volume = isFireAudio(node) ? FIRE_VOLUME : EFFECTS_VOLUME;
+        return;
+      }
+      if (node instanceof HTMLVideoElement) {
+        if (node.muted) return;
+        node.volume = VIDEO_AUDIO_VOLUME;
+        return;
+      }
+    };
+
+    document.addEventListener("play", handleMediaPlay, true);
+    return () => document.removeEventListener("play", handleMediaPlay, true);
+  }, [settingsReady]);
 
   useEffect(() => {
     if (!settingsReady) return;
@@ -127,14 +278,9 @@ export default function AudioControlPanel() {
           aria-controls="audio-control-panel"
           aria-label={isOpen ? "Cerrar controles de audio" : "Abrir controles de audio"}
         >
-          <Image
-            src="/Flecha.svg"
-            alt=""
-            width={14}
-            height={14}
-            className={`audioControlArrowIcon ${isOpen ? "is-open" : ""}`}
-            aria-hidden="true"
-          />
+          <span className="audioControlHandleLabel" aria-hidden="true">
+            Sonido
+          </span>
         </button>
       </div>
     </div>

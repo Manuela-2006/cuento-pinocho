@@ -207,7 +207,12 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
     <div className={styles.introRoot} aria-hidden="true">
       {!audioUnlocked && (
         <button type="button" className={styles.audioUnlock} onClick={unlockAudio}>
-          Toca para iniciar
+          <span>Toca para iniciar</span>
+          <span className={styles.audioUnlockHint}>
+            Recuerda pulsar y mover el ratón en ciertas zonas para descubrir
+            <br />
+            efectos y sonidos escondidos en esta maravillosa historia
+          </span>
         </button>
       )}
       <div ref={overlayRef} className={styles.introOverlay}>

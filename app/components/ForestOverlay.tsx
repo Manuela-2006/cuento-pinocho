@@ -26,6 +26,8 @@ const FOREST_IMAGES = [
 ] as const;
 
 export default function ForestOverlay() {
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeForestIndex, setActiveForestIndex] = useState<number | null>(null);
   const [showScene3GrilloTooltip, setShowScene3GrilloTooltip] = useState(false);
   const [showScene5GrilloTooltip, setShowScene5GrilloTooltip] = useState(false);
   const [scene2Sparkles, setScene2Sparkles] = useState<
@@ -46,6 +48,12 @@ export default function ForestOverlay() {
   const moneyAudioRef = useRef<HTMLAudioElement | null>(null);
   const baritaAudioRef = useRef<HTMLAudioElement | null>(null);
   const foxLaughAudioRef = useRef<HTMLAudioElement | null>(null);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena4VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena5VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
   const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
 
   const triggerScene2CoinSparkles = () => {
@@ -92,6 +100,133 @@ export default function ForestOverlay() {
     foxLaughAudioRef.current.currentTime = 0;
     void foxLaughAudioRef.current.play().catch(() => undefined);
   };
+
+  useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+        return;
+      }
+      syncVoiceFromStorage();
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const handleForestIndex = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveForestIndex(detail.index);
+    };
+
+    const handleForestLeave = () => {
+      setActiveForestIndex(null);
+    };
+
+    window.addEventListener("forest-active-index", handleForestIndex);
+    window.addEventListener("forest-sequence-leave", handleForestLeave);
+    return () => {
+      window.removeEventListener("forest-active-index", handleForestIndex);
+      window.removeEventListener("forest-sequence-leave", handleForestLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const escena4Audio = escena4VoiceRef.current;
+    const escena5Audio = escena5VoiceRef.current;
+    const activeAudio =
+      activeForestIndex === 0
+        ? escena1Audio
+        : activeForestIndex === 1
+          ? escena2Audio
+          : activeForestIndex === 2
+            ? escena3Audio
+            : activeForestIndex === 3
+              ? escena4Audio
+              : activeForestIndex === 4
+                ? escena5Audio
+          : null;
+
+    [escena1Audio, escena2Audio, escena3Audio, escena4Audio, escena5Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeForestIndex, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeForestIndex === 0
+          ? escena1VoiceRef.current
+          : activeForestIndex === 1
+            ? escena2VoiceRef.current
+            : activeForestIndex === 2
+              ? escena3VoiceRef.current
+              : activeForestIndex === 3
+                ? escena4VoiceRef.current
+                : activeForestIndex === 4
+                  ? escena5VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeForestIndex === 0 ||
+          activeForestIndex === 1 ||
+          activeForestIndex === 2 ||
+          activeForestIndex === 3 ||
+          activeForestIndex === 4) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeForestIndex, voiceOverEnabled]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -242,7 +377,7 @@ export default function ForestOverlay() {
               />
               <audio ref={moneyAudioRef} src="/Sonidos/Dinero.mp3" preload="auto" />
               <div className="sceneCornerBox sceneCornerTopRight" style={{ width: "300px" }}>
-                Conocemos una forma de hacerte rico le susurró el Zorro y le contó que había un árbol en que que si plantabas una moneda crecían muchas más.
+                "Conocemos una forma de hacerte rico", le susurró el Zorro, y le contó que había un árbol en el que, si plantabas una moneda, crecían muchas más.
               </div>
               <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "290px", padding: "0 0.8rem" }}>
                 Pinocho miraba su dinero emocionado, sin sospechar nada.
@@ -460,6 +595,36 @@ export default function ForestOverlay() {
 
         return null;
       })}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion4/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion4/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion4/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena4VoiceRef}
+        src="/Sonidos/voz/Seccion4/Escena4.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena5VoiceRef}
+        src="/Sonidos/voz/Seccion4/Escena5.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </div>
   );
 }

@@ -59,13 +59,13 @@ function Section7Scene1() {
       </div>
 
       <div className="sceneCornerBox sceneCornerTopRight" style={{ width: "360px" }}>
-        Pinocho regreso al taller.
+        Pinocho regresó al taller.
         <br />
-        Todo estaba oscuro, cubierto de polvo y telaranas.
+        Todo estaba oscuro, cubierto de polvo y telarañas.
         <br />
-        Papa? susurro con miedo.
+        "¿Papá?" susurró con miedo.
         <br />
-        Pero nadie respondio.
+        Pero nadie respondió.
       </div>
     </div>
   );
@@ -176,13 +176,13 @@ function Section7Scene2() {
       />
 
       <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "380px", zIndex: 12 }}>
-        En la ventana, una paloma le dejo una carta.
+        En la ventana, una paloma le dejó una carta.
         <br />
-        Pinocho la leyo con manos temblorosas.
+        Pinocho la leyó con manos temblorosas.
         <br />
-        Geppetto habia salido al mar para buscarlo
+        Geppetto había salido al mar para buscarlo
         <br />
-        y una enorme ballena lo habia tragado.
+        y una enorme ballena lo había tragado.
       </div>
     </div>
   );
@@ -316,19 +316,140 @@ function Section7Scene3() {
       )}
 
       <div className="sceneCornerBox sceneCornerTopLeft" style={{ width: "400px" }}>
-        Las lagrimas rodaron por su cara.
+        Las lágrimas rodaron por su cara.
         <br />
-        Pinocho abrazo la carta con tristeza.
+        Pinocho abrazó la carta con tristeza.
         <br />
-        Tengo que encontrarlo dijo decidido.
+        "Tengo que encontrarlo", dijo decidido.
         <br />
-        Y por primera vez, penso mas en su padre que en si mismo.
+        Y por primera vez, pensó más en su padre que en sí mismo.
       </div>
     </div>
   );
 }
 
 export default function Section7Overlay() {
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeSection7Index, setActiveSection7Index] = useState<number | null>(null);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
+
+  useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+        return;
+      }
+      syncVoiceFromStorage();
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const handleSection7Index = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveSection7Index(detail.index);
+    };
+
+    const handleSection7Leave = () => {
+      setActiveSection7Index(null);
+    };
+
+    window.addEventListener("section7-active-index", handleSection7Index);
+    window.addEventListener("section7-sequence-leave", handleSection7Leave);
+    return () => {
+      window.removeEventListener("section7-active-index", handleSection7Index);
+      window.removeEventListener("section7-sequence-leave", handleSection7Leave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const activeAudio =
+      activeSection7Index === 0
+        ? escena1Audio
+        : activeSection7Index === 1
+          ? escena2Audio
+          : activeSection7Index === 2
+            ? escena3Audio
+          : null;
+
+    [escena1Audio, escena2Audio, escena3Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeSection7Index, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeSection7Index === 0
+          ? escena1VoiceRef.current
+          : activeSection7Index === 1
+            ? escena2VoiceRef.current
+            : activeSection7Index === 2
+              ? escena3VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeSection7Index === 0 || activeSection7Index === 1 || activeSection7Index === 2) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeSection7Index, voiceOverEnabled]);
+
   return (
     <div className="section7Overlay" aria-hidden="true">
       {SECTION7_IMAGES.map((image) => {
@@ -348,6 +469,24 @@ export default function Section7Overlay() {
           <img key={image.src} className="scenePhoto" src={image.src} alt={image.alt} style={{ transform: "translateY(20px) scale(1.02)" }} />
         );
       })}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion6/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion6/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion6/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </div>
   );
 }

@@ -26,7 +26,8 @@ const VILLAGE_IMAGES = [
 
 export default function VillageOverlay() {
   const [isHoveringMusic, setIsHoveringMusic] = useState(false);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeVillageIndex, setActiveVillageIndex] = useState<number | null>(null);
   const [grilloTooltipData, setGrilloTooltipData] = useState<{
     show: boolean;
     x: number;
@@ -35,27 +36,37 @@ export default function VillageOverlay() {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
+  const videoAudioUnlockedRef = useRef(false);
+  const pendingVideoAudioUnlockRef = useRef(false);
+  const isHoveringMusicRef = useRef(false);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
 
   // ✅ Función para reproducir video con audio
-  const playVideoWithAudio = async () => {
-    if (!videoRef.current) return;
-    
-    try {
-      videoRef.current.muted = false;
-      videoRef.current.volume = 1.0;
-      videoRef.current.currentTime = 0;
-      await videoRef.current.play();
-      console.log("Video reproducido con audio");
-    } catch (error) {
-      console.error("Error al reproducir con audio:", error);
-    }
+  const playVideoMuted = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    video.currentTime = 0;
+    void video.play().catch(() => {});
   };
 
-  // ✅ Habilitar audio con click en el contenedor
-  const handleContainerClick = () => {
-    if (!audioUnlocked) {
-      setAudioUnlocked(true);
-      console.log("Audio desbloqueado por click");
+  const playVideoWithAudio = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = false;
+    video.volume = 1;
+    video.currentTime = 0;
+
+    try {
+      await video.play();
+      videoAudioUnlockedRef.current = true;
+      pendingVideoAudioUnlockRef.current = false;
+    } catch {
+      pendingVideoAudioUnlockRef.current = true;
+      playVideoMuted();
     }
   };
 
@@ -94,6 +105,26 @@ export default function VillageOverlay() {
   };
 
   useEffect(() => {
+    isHoveringMusicRef.current = isHoveringMusic;
+  }, [isHoveringMusic]);
+
+  useEffect(() => {
+    const unlockVideoAudio = () => {
+      videoAudioUnlockedRef.current = true;
+      if (!pendingVideoAudioUnlockRef.current) return;
+      if (!isHoveringMusicRef.current) return;
+      void playVideoWithAudio();
+    };
+
+    window.addEventListener("pointerdown", unlockVideoAudio);
+    window.addEventListener("keydown", unlockVideoAudio);
+    return () => {
+      window.removeEventListener("pointerdown", unlockVideoAudio);
+      window.removeEventListener("keydown", unlockVideoAudio);
+    };
+  }, []);
+
+  useEffect(() => {
     const container = svgContainerRef.current;
     if (!container) return;
 
@@ -112,6 +143,112 @@ export default function VillageOverlay() {
   }, []);
 
   useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+        return;
+      }
+      syncVoiceFromStorage();
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const handleVillageIndex = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveVillageIndex(detail.index);
+    };
+
+    const handleVillageLeave = () => {
+      setActiveVillageIndex(null);
+    };
+
+    window.addEventListener("village-active-index", handleVillageIndex);
+    window.addEventListener("village-sequence-leave", handleVillageLeave);
+    return () => {
+      window.removeEventListener("village-active-index", handleVillageIndex);
+      window.removeEventListener("village-sequence-leave", handleVillageLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const activeAudio =
+      activeVillageIndex === 0
+        ? escena1Audio
+        : activeVillageIndex === 1
+          ? escena2Audio
+          : null;
+
+    [escena1Audio, escena2Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeVillageIndex, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeVillageIndex === 0
+          ? escena1VoiceRef.current
+          : activeVillageIndex === 1
+            ? escena2VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay = (activeVillageIndex === 0 || activeVillageIndex === 1) && voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeVillageIndex, voiceOverEnabled]);
+
+  useEffect(() => {
     const video = videoRef.current;
     const interval = setInterval(() => {
       const overlay = document.querySelector(".villageOverlay") as HTMLElement | null;
@@ -121,11 +258,13 @@ export default function VillageOverlay() {
 
       setIsHoveringMusic(false);
       setGrilloTooltipData({ show: false, x: 0, y: 0 });
+      setActiveVillageIndex(null);
       if (video) {
         video.pause();
         video.currentTime = 0;
         video.muted = true;
       }
+      pendingVideoAudioUnlockRef.current = false;
     }, 220);
 
     return () => {
@@ -134,6 +273,15 @@ export default function VillageOverlay() {
         video.pause();
         video.currentTime = 0;
         video.muted = true;
+      }
+      pendingVideoAudioUnlockRef.current = false;
+      if (escena1VoiceRef.current) {
+        escena1VoiceRef.current.pause();
+        escena1VoiceRef.current.currentTime = 0;
+      }
+      if (escena2VoiceRef.current) {
+        escena2VoiceRef.current.pause();
+        escena2VoiceRef.current.currentTime = 0;
       }
     };
   }, []);
@@ -162,7 +310,6 @@ export default function VillageOverlay() {
                 key={image.src}
                 ref={svgContainerRef}
                 className={`scenePhoto sceneSvg villageHover${isHoveringMusic ? " is-playing" : ""}`}
-                onClick={handleContainerClick}
                 onPointerMove={(event) => {
                   handlePointerMoveGrillo(event);
 
@@ -187,28 +334,29 @@ export default function VillageOverlay() {
 
                   if (videoRef.current) {
                     if (isOver) {
-                      if (!isHoveringMusic && audioUnlocked) {
-                        // ✅ Solo reproducir si el audio ya está desbloqueado
-                        playVideoWithAudio();
-                      } else if (!isHoveringMusic && !audioUnlocked) {
-                        // ✅ Si no está desbloqueado, reproducir muted
-                        videoRef.current.currentTime = 0;
-                        videoRef.current.play().catch(() => undefined);
+                      if (!isHoveringMusic) {
+                        if (videoAudioUnlockedRef.current) {
+                          void playVideoWithAudio();
+                        } else {
+                          playVideoMuted();
+                        }
                       }
                     } else {
                       videoRef.current.pause();
                       videoRef.current.currentTime = 0;
+                      pendingVideoAudioUnlockRef.current = false;
                     }
                   }
                 }}
                 onPointerLeave={() => {
                   setIsHoveringMusic(false);
                   setGrilloTooltipData({ show: false, x: 0, y: 0 });
+                  pendingVideoAudioUnlockRef.current = false;
                 }}
                 style={{
                   position: "relative",
                   transform: "translateY(20px) scale(1.02)",
-                  cursor: audioUnlocked ? "default" : "pointer",
+                  cursor: "default",
                 }}
               >
                 <InlineSvg src={image.src} className="sceneSvgInner" />
@@ -280,6 +428,18 @@ export default function VillageOverlay() {
           <span className="thoughtTail" aria-hidden="true" />
         </div>
       )}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion2/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion2/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </>
   );
 }

@@ -26,6 +26,8 @@ const CIRCUS_IMAGES = [
 ] as const;
 
 export default function CircusOverlay() {
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeCircusIndex, setActiveCircusIndex] = useState<number | null>(null);
   const [confetti, setConfetti] = useState<
     {
       id: number;
@@ -55,6 +57,12 @@ export default function CircusOverlay() {
   const scene5FrameRef = useRef<HTMLDivElement | null>(null);
   const escena4AudioRef = useRef<HTMLAudioElement | null>(null);
   const fairyAudioRef = useRef<HTMLAudioElement | null>(null);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena4VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena5VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
   const fairyPlayedRef = useRef(false);
   const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
 
@@ -86,8 +94,19 @@ export default function CircusOverlay() {
   }, []);
 
   useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
     const handleAudioSettings = (event: Event) => {
-      const detail = (event as CustomEvent<{ effectsEnabled?: boolean }>).detail;
+      const detail = (event as CustomEvent<{ effectsEnabled?: boolean; voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+      } else {
+        syncVoiceFromStorage();
+      }
       if (detail?.effectsEnabled === false) {
         fairyPlayedRef.current = false;
         if (fairyAudioRef.current) {
@@ -100,6 +119,113 @@ export default function CircusOverlay() {
     window.addEventListener("pinocho-audio-settings", handleAudioSettings);
     return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
   }, []);
+
+  useEffect(() => {
+    const handleCircusIndex = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveCircusIndex(detail.index);
+    };
+
+    const handleCircusLeave = () => {
+      setActiveCircusIndex(null);
+    };
+
+    window.addEventListener("circus-active-index", handleCircusIndex);
+    window.addEventListener("circus-sequence-leave", handleCircusLeave);
+    return () => {
+      window.removeEventListener("circus-active-index", handleCircusIndex);
+      window.removeEventListener("circus-sequence-leave", handleCircusLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const escena4Audio = escena4VoiceRef.current;
+    const escena5Audio = escena5VoiceRef.current;
+    const activeAudio =
+      activeCircusIndex === 0
+        ? escena1Audio
+        : activeCircusIndex === 1
+          ? escena2Audio
+          : activeCircusIndex === 2
+            ? escena3Audio
+            : activeCircusIndex === 3
+              ? escena4Audio
+              : activeCircusIndex === 4
+                ? escena5Audio
+          : null;
+
+    [escena1Audio, escena2Audio, escena3Audio, escena4Audio, escena5Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeCircusIndex, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeCircusIndex === 0
+          ? escena1VoiceRef.current
+          : activeCircusIndex === 1
+            ? escena2VoiceRef.current
+            : activeCircusIndex === 2
+              ? escena3VoiceRef.current
+              : activeCircusIndex === 3
+                ? escena4VoiceRef.current
+                : activeCircusIndex === 4
+                  ? escena5VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeCircusIndex === 0 ||
+          activeCircusIndex === 1 ||
+          activeCircusIndex === 2 ||
+          activeCircusIndex === 3 ||
+          activeCircusIndex === 4) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeCircusIndex, voiceOverEnabled]);
 
   useEffect(() => {
     const node = scene5FrameRef.current;
@@ -227,7 +353,7 @@ export default function CircusOverlay() {
               >
                 Pinocho llegó a un gran teatro de marionetas, lleno de luces y música.
                 Allí conoció a un hombre grande llamado Stromboli, que exclamó sorprendido:
-                ¡Una marioneta que camina sola! ¡Serás una gran estrella!
+                "¡Una marioneta que camina sola! ¡Serás una gran estrella!"
               </div>
             </div>
           );
@@ -276,10 +402,8 @@ export default function CircusOverlay() {
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
               <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "340px" }}>
-                Después del espectáculo, Stromboli le preguntó con voz seria:
-                ¿Tu padre sabe que estás aquí?
-                Pinocho dudó y respondió:
-                Sí claro Geppetto está muy contento.
+                Después del espectáculo, Stromboli le preguntó con voz seria: "¿Tu padre sabe que estás aquí?".
+                Pinocho dudó y respondió: "Sí, claro. Geppetto está muy contento".
                 Entonces, su nariz empezó a crecer sin parar.
               </div>
             </div>
@@ -328,7 +452,7 @@ export default function CircusOverlay() {
                 style={{ width: "300px", minHeight: "140px", padding: "0.3rem 0.7rem" }}
               >
                 Stromboli se enfadó al descubrir la mentira y encerró a Pinocho en una jaula.
-                ¡Trabajarás para mí para siempre! gritó.
+                "¡Trabajarás para mí para siempre!", gritó.
               </div>
               {tears.map((tear) => (
                 <div
@@ -386,7 +510,7 @@ export default function CircusOverlay() {
                 className="sceneCornerBox sceneCornerBottomLeft"
                 style={{ width: "300px", padding: "0.05rem 0.8rem" }}
               >
-                ¡Lo prometo!, dijo Pinocho llorando.
+                "¡Lo prometo!", dijo Pinocho llorando.
                 Poco a poco, su nariz volvió a ser pequeña.
               </div>
               {fairyParticles.map((piece) => (
@@ -419,6 +543,36 @@ export default function CircusOverlay() {
           />
         );
       })}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion3/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion3/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion3/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena4VoiceRef}
+        src="/Sonidos/voz/Seccion3/Escena4.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena5VoiceRef}
+        src="/Sonidos/voz/Seccion3/Escena5.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </div>
   );
 }

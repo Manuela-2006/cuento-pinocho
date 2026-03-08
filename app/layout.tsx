@@ -4,6 +4,7 @@ import "./globals.css";
 import LenisProvider from "./components/LenisProvider";
 import ScrollNose from "./components/ScrollNose";
 import AudioControlPanel from "./components/AudioControlPanel";
+import VoiceOverArbiter from "./components/VoiceOverArbiter";
 
 export const metadata: Metadata = {
   title: "Cuento Pinocho",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <LenisProvider />
         <ScrollNose />
         <AudioControlPanel />
+        <VoiceOverArbiter />
         {children}
       </body>
     </html>

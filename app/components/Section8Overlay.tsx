@@ -145,20 +145,30 @@ function Section8Scene2({ showSection8Images }: { showSection8Images: boolean })
         preload="auto"
       />
       <div className="sceneCornerBox sceneCornerTopRight" style={{ width: "390px", zIndex: 12 }}>
-        De pronto, una enorme ballena aparecio a su lado.
+              De pronto, una enorme ballena apareció a su lado.
         <br />
-        El agua giro a su alrededor y lo arrastro hacia su boca.
+              El agua giró a su alrededor y lo arrastró hacia su boca.
         <br />
-        &iexcl;Pinocho! grito Pepito.
+              "¡Pinocho!" gritó Pepito.
       </div>
     </div>
   );
 }
 
 export default function Section8Overlay() {
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeSection8Index, setActiveSection8Index] = useState<number | null>(null);
   const [showSection8Images, setShowSection8Images] = useState(false);
   const [showScene1Tooltip, setShowScene1Tooltip] = useState(false);
   const [showScene3Tooltip, setShowScene3Tooltip] = useState(false);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena4VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena5VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena6VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena7VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
   const scene5FrameRef = useRef<HTMLDivElement | null>(null);
   const fireAudioRef = useRef<HTMLAudioElement | null>(null);
   const fireStopTimeoutRef = useRef<number | null>(null);
@@ -170,6 +180,145 @@ export default function Section8Overlay() {
   const scene6WasActiveRef = useRef(false);
   const scene6PlayedRef = useRef(false);
   const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
+
+  useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+        return;
+      }
+      syncVoiceFromStorage();
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+
+  useEffect(() => {
+    const handleSection8Index = (event: Event) => {
+      const detail = (event as CustomEvent<{ index: number }>).detail;
+      if (!detail) return;
+      setActiveSection8Index(detail.index);
+    };
+
+    const handleSection8Leave = () => {
+      setActiveSection8Index(null);
+    };
+
+    window.addEventListener("section8-active-index", handleSection8Index);
+    window.addEventListener("section8-sequence-leave", handleSection8Leave);
+    return () => {
+      window.removeEventListener("section8-active-index", handleSection8Index);
+      window.removeEventListener("section8-sequence-leave", handleSection8Leave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const escena4Audio = escena4VoiceRef.current;
+    const escena5Audio = escena5VoiceRef.current;
+    const escena6Audio = escena6VoiceRef.current;
+    const escena7Audio = escena7VoiceRef.current;
+    const activeAudio =
+      activeSection8Index === 0
+        ? escena1Audio
+        : activeSection8Index === 1
+          ? escena2Audio
+          : activeSection8Index === 2
+            ? escena3Audio
+            : activeSection8Index === 3
+              ? escena4Audio
+              : activeSection8Index === 4
+                ? escena5Audio
+                : activeSection8Index === 5
+                  ? escena6Audio
+                  : activeSection8Index === 6
+                    ? escena7Audio
+          : null;
+
+    [escena1Audio, escena2Audio, escena3Audio, escena4Audio, escena5Audio, escena6Audio, escena7Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeSection8Index, voiceOverEnabled]);
+
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeSection8Index === 0
+          ? escena1VoiceRef.current
+          : activeSection8Index === 1
+            ? escena2VoiceRef.current
+            : activeSection8Index === 2
+              ? escena3VoiceRef.current
+              : activeSection8Index === 3
+                ? escena4VoiceRef.current
+                : activeSection8Index === 4
+                  ? escena5VoiceRef.current
+                  : activeSection8Index === 5
+                    ? escena6VoiceRef.current
+                    : activeSection8Index === 6
+                      ? escena7VoiceRef.current
+            : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeSection8Index === 0 ||
+          activeSection8Index === 1 ||
+          activeSection8Index === 2 ||
+          activeSection8Index === 3 ||
+          activeSection8Index === 4 ||
+          activeSection8Index === 5 ||
+          activeSection8Index === 6) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeSection8Index, voiceOverEnabled]);
 
   useEffect(() => {
     const computeVisibility = () => {
@@ -401,13 +550,13 @@ export default function Section8Overlay() {
             )}
 
             <div className="sceneCornerBox sceneCornerTopLeft" style={{ width: "390px" }}>
-              Pinocho miro el mar embravecido.
+              Pinocho miró el mar embravecido.
               <br />
-              Sabia que su padre estaba alli dentro.
+              Sabía que su padre estaba allí dentro.
               <br />
-              Con el corazon lleno de valor, sostuvo una gran piedra.
+              Con el corazón lleno de valor, sostuvo una gran piedra.
               <br />
-              &iexcl;No tengo miedo! dijo decidido.
+              "¡No tengo miedo!" dijo decidido.
             </div>
           </div>
         ) : image.src === "/seccion8/Escena2.svg" ? (
@@ -465,9 +614,9 @@ export default function Section8Overlay() {
             <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "390px" }}>
               Cuando despertaron, estaban en el interior oscuro de la ballena.
               <br />
-              Una pequena barca flotaba entre restos de madera.
+              Una pequeña barca flotaba entre restos de madera.
               <br />
-              Pinocho miro a su alrededor sin saber que hacer.
+              Pinocho miró a su alrededor sin saber qué hacer.
             </div>
           </div>
         ) : image.src === "/seccion8/Escena4.jpg" ? (
@@ -482,13 +631,13 @@ export default function Section8Overlay() {
           >
             <img className="sceneFrameImage section8BoatDriftImage" src={image.src} alt={image.alt} />
             <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "370px" }}>
-              De pronto, una voz familiar lo llamo.
+              De pronto, una voz familiar lo llamó.
               <br />
-              &iexcl;Pinocho!
+              "¡Pinocho!"
               <br />
               Era Geppetto.
               <br />
-              Padre e hijo se abrazaron con alegria.
+              Padre e hijo se abrazaron con alegría.
             </div>
           </div>
         ) : image.src === "/seccion8/Escena5.jpg" ? (
@@ -531,7 +680,7 @@ export default function Section8Overlay() {
               <br />
               El humo hizo cosquillas en la enorme nariz del monstruo.
               <br />
-              &iexcl;Va a estornudar! grito Pepito.
+              "¡Va a estornudar!" gritó Pepito.
             </div>
           </div>
         ) : image.src === "/seccion8/Escena6.jpg" ? (
@@ -616,13 +765,13 @@ export default function Section8Overlay() {
               ))}
             </div>
             <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "390px" }}>
-              La ballena estornudo con tanta fuerza
+              La ballena estornudó con tanta fuerza
               <br />
-              que los lanzo fuera, junto al mar embravecido.
+              que los lanzó fuera, junto al mar embravecido.
               <br />
-              Pinocho tomo los remos con decision.
+              Pinocho tomó los remos con decisión.
               <br />
-              &iexcl;Rapido, papa!
+              "¡Rápido, papá!"
             </div>
           </div>
         ) : image.src === "/seccion8/videoBallena.mp4" ? (
@@ -636,13 +785,13 @@ export default function Section8Overlay() {
           >
             <video className="sceneFrameImage" src={image.src} autoPlay loop muted playsInline preload="auto" />
             <div className="sceneCornerBox sceneCornerBottomLeft" style={{ width: "410px" }}>
-              La ballena los persiguio entre rayos y olas gigantes.
+              La ballena los persiguió entre rayos y olas gigantes.
               <br />
-              Su enorme boca se abrio frente a la barca.
+              Su enorme boca se abrió frente a la barca.
               <br />
               Geppetto temblaba.
               <br />
-              Pero Pinocho encontro un sitio seguro para refugiarse.
+              Pero Pinocho encontró un sitio seguro para refugiarse.
             </div>
           </div>
         ) : (
@@ -658,6 +807,48 @@ export default function Section8Overlay() {
           />
         )
       )}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena4VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena4.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena5VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena5.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena6VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena6.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena7VoiceRef}
+        src="/Sonidos/voz/Seccion7/Escena7.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </div>
   );
 }

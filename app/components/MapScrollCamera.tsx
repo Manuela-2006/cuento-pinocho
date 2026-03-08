@@ -344,11 +344,17 @@ export default function MapScrollCamera() {
             gsap.to(mapLayer, { filter: "blur(10px)", duration: 0.6, ease: "power2.out" });
             gsap.to(overlay, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
             overlay.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("geppetto-active-index", { detail: { index: 0 } })
+            );
           },
           onEnterBack: () => {
             gsap.to(mapLayer, { filter: "blur(10px)", duration: 0.6, ease: "power2.out" });
             gsap.to(overlay, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
             overlay.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("geppetto-active-index", { detail: { index: 0 } })
+            );
           },
           onLeave: () => {
             gsap.to(mapLayer, { filter: "blur(0px)", duration: 0.6, ease: "power2.out" });
@@ -408,6 +414,9 @@ export default function MapScrollCamera() {
             }
             gsap.to(villageOverlay, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
             villageOverlay.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("village-active-index", { detail: { index: 0 } })
+            );
           },
           onEnterBack: () => {
             if (mapLayer) {
@@ -422,6 +431,9 @@ export default function MapScrollCamera() {
               villagePhotos.forEach((photo) => photo.classList.remove("is-active"));
               villagePhotos[lastIndex]?.classList.add("is-active");
               villageIndex = lastIndex;
+              window.dispatchEvent(
+                new CustomEvent("village-active-index", { detail: { index: lastIndex } })
+              );
             }
           },
           onLeave: () => {
@@ -430,6 +442,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(villageOverlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             villageOverlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("village-sequence-leave"));
           },
           onLeaveBack: () => {
             if (mapLayer) {
@@ -437,6 +450,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(villageOverlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             villageOverlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("village-sequence-leave"));
           },
           onUpdate: (self) => {
             const nextIndex = Math.min(
@@ -450,6 +464,9 @@ export default function MapScrollCamera() {
               villagePhotos[villageIndex]?.classList.remove("is-active");
               villagePhotos[nextIndex]?.classList.add("is-active");
               villageIndex = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("village-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
         });
@@ -485,6 +502,9 @@ export default function MapScrollCamera() {
           circusPhotos[circusIndex]?.classList.remove("is-active");
           circusPhotos[safeIndex]?.classList.add("is-active");
           circusIndex = safeIndex;
+          window.dispatchEvent(
+            new CustomEvent("circus-active-index", { detail: { index: safeIndex } })
+          );
         };
 
         const circusTrigger = ScrollTrigger.create({
@@ -504,6 +524,9 @@ export default function MapScrollCamera() {
             gsap.set(circusPhotos[0], { autoAlpha: 1 });
             circusPhotos[0]?.classList.add("is-active");
             circusIndex = 0;
+            window.dispatchEvent(
+              new CustomEvent("circus-active-index", { detail: { index: 0 } })
+            );
             if (villageOverlay) {
               gsap.to(villageOverlay, { autoAlpha: 0, duration: 0.2, ease: "power2.out" });
               villageOverlay.classList.remove("is-active");
@@ -534,6 +557,9 @@ export default function MapScrollCamera() {
               circusPhotos.forEach((photo) => photo.classList.remove("is-active"));
               circusPhotos[lastIndex]?.classList.add("is-active");
               circusIndex = lastIndex;
+              window.dispatchEvent(
+                new CustomEvent("circus-active-index", { detail: { index: lastIndex } })
+              );
             }
           },
           onLeave: () => {
@@ -546,6 +572,7 @@ export default function MapScrollCamera() {
               gsap.set(circusPhotos, { autoAlpha: 0 });
               circusPhotos.forEach((photo) => photo.classList.remove("is-active"));
             }
+            window.dispatchEvent(new CustomEvent("circus-sequence-leave"));
           },
           onLeaveBack: () => {
             if (mapLayer) {
@@ -557,6 +584,7 @@ export default function MapScrollCamera() {
               gsap.set(circusPhotos, { autoAlpha: 0 });
               circusPhotos.forEach((photo) => photo.classList.remove("is-active"));
             }
+            window.dispatchEvent(new CustomEvent("circus-sequence-leave"));
           },
           onUpdate: (self) => {
             let nextIndex = Math.min(
@@ -614,6 +642,9 @@ export default function MapScrollCamera() {
           gsap.set(forestPhotos[nextIndex], { autoAlpha: 1 });
           forestPhotos[nextIndex]?.classList.add("is-active");
           forestIndex = nextIndex;
+          window.dispatchEvent(
+            new CustomEvent("forest-active-index", { detail: { index: nextIndex } })
+          );
         };
 
         const forestTrigger = ScrollTrigger.create({
@@ -656,6 +687,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(forestOverlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             forestOverlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("forest-sequence-leave"));
           },
           onLeaveBack: () => {
             setSection7Mode(false);
@@ -664,6 +696,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(forestOverlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             forestOverlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("forest-sequence-leave"));
           },
           onUpdate: (self) => {
             const nextIndex = Math.min(
@@ -677,6 +710,9 @@ export default function MapScrollCamera() {
               forestPhotos[forestIndex]?.classList.remove("is-active");
               forestPhotos[nextIndex]?.classList.add("is-active");
               forestIndex = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("forest-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
           onRefresh: (self) => {
@@ -726,6 +762,9 @@ export default function MapScrollCamera() {
             }
             gsap.to(islandOverlay, { autoAlpha: 1, duration: 0.4, ease: "power2.out" });
             islandOverlay.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("island-active-index", { detail: { index: 0 } })
+            );
             if (forestOverlay) {
               gsap.to(forestOverlay, { autoAlpha: 0, duration: 0.2, ease: "power2.out" });
               forestOverlay.classList.remove("is-active");
@@ -751,6 +790,9 @@ export default function MapScrollCamera() {
               islandPhotos.forEach((photo) => photo.classList.remove("is-active"));
               islandPhotos[lastIndex]?.classList.add("is-active");
               islandIndex = lastIndex;
+              window.dispatchEvent(
+                new CustomEvent("island-active-index", { detail: { index: lastIndex } })
+              );
             }
           },
           onLeave: () => {
@@ -760,6 +802,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(islandOverlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             islandOverlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("island-sequence-leave"));
           },
           onLeaveBack: () => {
             setIslandMode(false);
@@ -768,6 +811,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(islandOverlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             islandOverlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("island-sequence-leave"));
           },
           onRefresh: (self) => {
             if (self.isActive || self.progress > 0) {
@@ -793,6 +837,9 @@ export default function MapScrollCamera() {
               islandPhotos[islandIndex]?.classList.remove("is-active");
               islandPhotos[nextIndex]?.classList.add("is-active");
               islandIndex = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("island-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
         });
@@ -852,6 +899,9 @@ export default function MapScrollCamera() {
             gsap.set(section7Photos[section7Index], { autoAlpha: 1 });
             section7Photos.forEach((photo) => photo.classList.remove("is-active"));
             section7Photos[section7Index]?.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("section7-active-index", { detail: { index: section7Index } })
+            );
             if (islandOverlay) {
               gsap.to(islandOverlay, { autoAlpha: 0, duration: 0.2, ease: "power2.out" });
               islandOverlay.classList.remove("is-active");
@@ -876,6 +926,9 @@ export default function MapScrollCamera() {
             gsap.set(section7Photos[section7Index], { autoAlpha: 1 });
             section7Photos.forEach((photo) => photo.classList.remove("is-active"));
             section7Photos[section7Index]?.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("section7-active-index", { detail: { index: section7Index } })
+            );
             if (islandOverlay) {
               gsap.set(islandOverlay, { autoAlpha: 0 });
               islandOverlay.classList.remove("is-active");
@@ -892,6 +945,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(section7Overlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             section7Overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("section7-sequence-leave"));
           },
           onLeaveBack: () => {
             setSection7Mode(false);
@@ -900,6 +954,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(section7Overlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             section7Overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("section7-sequence-leave"));
           },
           onRefresh: (self) => {
             if (self.isActive || self.progress > 0) {
@@ -925,6 +980,9 @@ export default function MapScrollCamera() {
               section7Photos[section7Index]?.classList.remove("is-active");
               section7Photos[nextIndex]?.classList.add("is-active");
               section7Index = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("section7-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
         });
@@ -986,6 +1044,9 @@ export default function MapScrollCamera() {
             gsap.set(section8Photos[section8Index], { autoAlpha: 1 });
             section8Photos.forEach((photo) => photo.classList.remove("is-active"));
             section8Photos[section8Index]?.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("section8-active-index", { detail: { index: section8Index } })
+            );
           },
           onEnterBack: () => {
             document.body.classList.add("section8-sequence-active");
@@ -1003,6 +1064,9 @@ export default function MapScrollCamera() {
             gsap.set(section8Photos[section8Index], { autoAlpha: 1 });
             section8Photos.forEach((photo) => photo.classList.remove("is-active"));
             section8Photos[section8Index]?.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("section8-active-index", { detail: { index: section8Index } })
+            );
           },
           onLeave: () => {
             document.body.classList.remove("section8-sequence-active");
@@ -1012,6 +1076,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(section8Overlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             section8Overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("section8-sequence-leave"));
           },
           onLeaveBack: () => {
             document.body.classList.remove("section8-sequence-active");
@@ -1021,6 +1086,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(section8Overlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             section8Overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("section8-sequence-leave"));
           },
           onRefresh: (self) => {
             document.body.classList.toggle("section8-sequence-active", self.isActive);
@@ -1069,6 +1135,9 @@ export default function MapScrollCamera() {
               section8Photos[section8Index]?.classList.remove("is-active");
               section8Photos[nextIndex]?.classList.add("is-active");
               section8Index = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("section8-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
         });
@@ -1149,6 +1218,9 @@ export default function MapScrollCamera() {
             gsap.set(section9Photos[section9Index], { autoAlpha: 1 });
             section9Photos.forEach((photo) => photo.classList.remove("is-active"));
             section9Photos[section9Index]?.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("section9-active-index", { detail: { index: section9Index } })
+            );
           },
           onEnterBack: () => {
             setFinalMapMode(false);
@@ -1174,6 +1246,9 @@ export default function MapScrollCamera() {
             gsap.set(section9Photos[section9Index], { autoAlpha: 1 });
             section9Photos.forEach((photo) => photo.classList.remove("is-active"));
             section9Photos[section9Index]?.classList.add("is-active");
+            window.dispatchEvent(
+              new CustomEvent("section9-active-index", { detail: { index: section9Index } })
+            );
           },
           onLeave: () => {
             setSection9Mode(false);
@@ -1182,6 +1257,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(section9Overlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             section9Overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("section9-sequence-leave"));
           },
           onLeaveBack: () => {
             setSection9Mode(false);
@@ -1190,6 +1266,7 @@ export default function MapScrollCamera() {
             }
             gsap.to(section9Overlay, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
             section9Overlay.classList.remove("is-active");
+            window.dispatchEvent(new CustomEvent("section9-sequence-leave"));
           },
           onRefresh: (self) => {
             if (self.isActive || self.progress > 0) {
@@ -1215,6 +1292,9 @@ export default function MapScrollCamera() {
               section9Photos[section9Index]?.classList.remove("is-active");
               section9Photos[nextIndex]?.classList.add("is-active");
               section9Index = nextIndex;
+              window.dispatchEvent(
+                new CustomEvent("section9-active-index", { detail: { index: nextIndex } })
+              );
             }
           },
         });

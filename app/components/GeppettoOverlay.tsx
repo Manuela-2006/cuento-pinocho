@@ -34,7 +34,9 @@ const SCENE_IMAGES = [
   {
     src: "/seccion1/Escena2.jpg",
     alt: "Escena 2",
-    text: `Un día, mientras trabajaba, encontró un trozo de madera muy especial que brillaba con una luz dorada. "¡Qué madera tan bonita!", pensó Geppetto. "Voy a hacer una marioneta para que me haga compañía".`,
+    text: `Un día, mientras trabajaba, encontró un trozo de madera muy especial que brillaba con una luz dorada.
+"¡Qué madera tan bonita!", pensó Geppetto.
+"Voy a hacer una marioneta para que me haga compañía."`,
     textPosition: "bottom-left",
     hasMagicWood: true,
     hasFire: true,
@@ -47,13 +49,13 @@ const SCENE_IMAGES = [
       topLeft:
         "Durante toda la noche, Geppetto trabajó con mucho cariño. Talló una cabeza redonda, brazos largos, piernas delgadas y una naricita pequeña.",
       bottomRight:
-        'Cuando terminó, sonrió y dijo: "Te llamaré Pinocho. Serás como el hijo que nunca tuve".',
+        'Cuando terminó, sonrió y dijo:\n"Te llamaré Pinocho. Serás como el hijo que nunca tuve."',
     },
   },
   {
     src: "/seccion1/Escena4.jpg",
     alt: "Escena 4",
-    text: `Esa noche, antes de irse a dormir, Geppetto miró al cielo por la ventana. Una estrella brillaba más que todas las demás. Geppetto juntó las manos y susurró: "Querida estrella… ojalá Pinocho fuera un niño de verdad.".`,
+    text: `Esa noche, antes de irse a dormir, Geppetto miró al cielo por la ventana. Una estrella brillaba más que todas las demás. Geppetto juntó las manos y susurró: "Querida estrella ojalá Pinocho fuera un niño de verdad."`,
     textPosition: "bottom-left",
   },
   {
@@ -67,13 +69,14 @@ const SCENE_IMAGES = [
   {
     src: "/seccion2/Escena2.jpg",
     alt: "Escena 6",
-    text: "El hada tocó a Pinocho con su varita y le dio vida, advirtiéndole que solo podría ser un niño de verdad si era valiente, sincero y generoso, y que las mentiras tendrían consecuencias.",
+    text: "El Hada Azul tocó a Pinocho con su varita y le dio vida, advirtiéndole que solo podría ser un niño de verdad si era valiente, sincero y generoso, y que las mentiras tendrían consecuencias.",
     textPosition: "top-left",
   },
   {
     src: "/seccion2/Escena3.jpg",
     alt: "Escena 7",
-    text: `Pinocho movió sus brazos, sus piernas y dio su primer paso. "¡Estoy vivo!", gritó feliz.\nEl Hada Azul despertó a un pequeño grillo del taller. "Pepito Grillo, tú serás su conciencia"`,
+    text: `Pinocho movió sus brazos, sus piernas y dio su primer paso. "¡Estoy vivo!", gritó feliz.
+El Hada Azul despertó a un pequeño grillo del taller. "Pepito Grillo, tú serás su conciencia."`,
     textPosition: "top-left",
     hasGrilloTooltip: true,
   },
@@ -86,7 +89,9 @@ const SCENE_IMAGES = [
   {
     src: "/seccion3/Escena2.jpg",
     alt: "Escena 9",
-    text: "Geppetto le regaló ropa nueva y un libro. \"Hoy irás a la escuela\", le dijo. \"Allí aprenderás a ser un niño de verdad\".",
+    text: `Geppetto le regaló ropa nueva y un libro.
+"Hoy irás a la escuela", le dijo.
+"Allí aprenderás a ser un niño de verdad."`,
     textPosition: "top-left",
   },
 ] as const;
@@ -95,6 +100,8 @@ export default function GeppettoOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAfterVideo, setShowAfterVideo] = useState(false);
   const [isFading, setIsFading] = useState(false);
+  const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
+  const [activeGeppettoIndex, setActiveGeppettoIndex] = useState<number | null>(null);
   const [grilloTooltipData, setGrilloTooltipData] = useState<{
     show: boolean;
     x: number;
@@ -104,6 +111,16 @@ export default function GeppettoOverlay() {
   const [flames, setFlames] = useState<Flame[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const escena1VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena2VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena3VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena4VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena5VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena6VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena7VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena8VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const escena9VoiceRef = useRef<HTMLAudioElement | null>(null);
+  const pendingVoiceUnlockRef = useRef(false);
   const particleIdRef = useRef(0);
   const flameIdRef = useRef(0);
   const animationFrameRef = useRef<number | undefined>(undefined);
@@ -191,6 +208,7 @@ export default function GeppettoOverlay() {
       setIsOpen(false);
       setShowAfterVideo(false);
       setIsFading(false);
+      setActiveGeppettoIndex(null);
     };
     window.addEventListener("geppetto-sequence-leave", handleLeave);
     return () => window.removeEventListener("geppetto-sequence-leave", handleLeave);
@@ -210,10 +228,142 @@ export default function GeppettoOverlay() {
         setShowAfterVideo(false);
         setIsFading(false);
       }
+
+      setActiveGeppettoIndex(detail.index);
     };
     window.addEventListener("geppetto-active-index", handleActiveIndex);
     return () => window.removeEventListener("geppetto-active-index", handleActiveIndex);
   }, []);
+  useEffect(() => {
+    const syncVoiceFromStorage = () => {
+      setVoiceOverEnabled(localStorage.getItem("pinocho:voiceover-enabled") === "true");
+    };
+
+    syncVoiceFromStorage();
+
+    const handleAudioSettings = (event: Event) => {
+      const detail = (event as CustomEvent<{ voiceOverEnabled?: boolean }>).detail;
+      if (typeof detail?.voiceOverEnabled === "boolean") {
+        setVoiceOverEnabled(detail.voiceOverEnabled);
+        return;
+      }
+      syncVoiceFromStorage();
+    };
+
+    window.addEventListener("pinocho-audio-settings", handleAudioSettings);
+    return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
+  }, []);
+  useEffect(() => {
+    const escena1Audio = escena1VoiceRef.current;
+    const escena2Audio = escena2VoiceRef.current;
+    const escena3Audio = escena3VoiceRef.current;
+    const escena4Audio = escena4VoiceRef.current;
+    const escena5Audio = escena5VoiceRef.current;
+    const escena6Audio = escena6VoiceRef.current;
+    const escena7Audio = escena7VoiceRef.current;
+    const escena8Audio = escena8VoiceRef.current;
+    const escena9Audio = escena9VoiceRef.current;
+    const activeAudio =
+      activeGeppettoIndex === 0
+        ? escena1Audio
+        : activeGeppettoIndex === 1
+          ? escena2Audio
+          : activeGeppettoIndex === 2
+            ? escena3Audio
+            : activeGeppettoIndex === 3
+              ? escena4Audio
+              : activeGeppettoIndex === 4
+                ? escena5Audio
+                : activeGeppettoIndex === 5
+                  ? escena6Audio
+                  : activeGeppettoIndex === 6
+                    ? escena7Audio
+                    : activeGeppettoIndex === 7
+                      ? escena8Audio
+                      : activeGeppettoIndex === 8
+                        ? escena9Audio
+          : null;
+    const shouldPlay = !!activeAudio && voiceOverEnabled;
+
+    [escena1Audio, escena2Audio, escena3Audio, escena4Audio, escena5Audio, escena6Audio, escena7Audio, escena8Audio, escena9Audio].forEach((audio) => {
+      if (!audio || audio === activeAudio) return;
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    if (!shouldPlay) {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+      pendingVoiceUnlockRef.current = false;
+      return;
+    }
+
+    activeAudio.muted = false;
+    activeAudio.volume = 1;
+    activeAudio.currentTime = 0;
+    void activeAudio.play().catch(() => {
+      pendingVoiceUnlockRef.current = true;
+    });
+  }, [activeGeppettoIndex, voiceOverEnabled]);
+  useEffect(() => {
+    const retryIfNeeded = () => {
+      if (!pendingVoiceUnlockRef.current) return;
+      const audio =
+        activeGeppettoIndex === 0
+          ? escena1VoiceRef.current
+          : activeGeppettoIndex === 1
+            ? escena2VoiceRef.current
+            : activeGeppettoIndex === 2
+              ? escena3VoiceRef.current
+              : activeGeppettoIndex === 3
+                ? escena4VoiceRef.current
+                : activeGeppettoIndex === 4
+                  ? escena5VoiceRef.current
+                  : activeGeppettoIndex === 5
+                    ? escena6VoiceRef.current
+                    : activeGeppettoIndex === 6
+                      ? escena7VoiceRef.current
+                      : activeGeppettoIndex === 7
+                        ? escena8VoiceRef.current
+                        : activeGeppettoIndex === 8
+                          ? escena9VoiceRef.current
+              : null;
+      if (!audio) return;
+      const shouldPlay =
+        (activeGeppettoIndex === 0 ||
+          activeGeppettoIndex === 1 ||
+          activeGeppettoIndex === 2 ||
+          activeGeppettoIndex === 3 ||
+          activeGeppettoIndex === 4 ||
+          activeGeppettoIndex === 5 ||
+          activeGeppettoIndex === 6 ||
+          activeGeppettoIndex === 7 ||
+          activeGeppettoIndex === 8) &&
+        voiceOverEnabled;
+      if (!shouldPlay) {
+        pendingVoiceUnlockRef.current = false;
+        return;
+      }
+
+      audio.muted = false;
+      audio.volume = 1;
+      audio.currentTime = 0;
+      void audio.play()
+        .then(() => {
+          pendingVoiceUnlockRef.current = false;
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", retryIfNeeded);
+    window.addEventListener("keydown", retryIfNeeded);
+    return () => {
+      window.removeEventListener("pointerdown", retryIfNeeded);
+      window.removeEventListener("keydown", retryIfNeeded);
+    };
+  }, [activeGeppettoIndex, voiceOverEnabled]);
   // ✨ Partículas
   useEffect(() => {
     if (particles.length === 0) {
@@ -383,7 +533,17 @@ export default function GeppettoOverlay() {
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div className="sceneCornerBox sceneCornerTopLeft">{customTexts.topLeft}</div>
-                  <div className="sceneCornerBox sceneParagraphHero">{customTexts.bottomRight}</div>
+                  <div
+                    className="sceneCornerBox sceneParagraphHero"
+                    style={{
+                      whiteSpace: "pre-line",
+                      minHeight: "0",
+                      display: "block",
+                      padding: "0.8rem 0.8rem",
+                    }}
+                  >
+                    {customTexts.bottomRight}
+                  </div>
                 </div>
               );
             }
@@ -586,6 +746,60 @@ export default function GeppettoOverlay() {
           }}
         />
       ))}
+      <audio
+        ref={escena1VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena1.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena2VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena2.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena3VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena3.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena4VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena4.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena5VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena5.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena6VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena6.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena7VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena7.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena8VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena8.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
+      <audio
+        ref={escena9VoiceRef}
+        src="/Sonidos/voz/Seccion1/Escena9.mp3"
+        preload="auto"
+        data-audio-channel="voiceover"
+      />
     </>
   );
 }

@@ -465,9 +465,7 @@ export default function Section7Overlay() {
           return <Section7Scene3 key={image.src} />;
         }
 
-        return (
-          <img key={image.src} className="scenePhoto" src={image.src} alt={image.alt} style={{ transform: "translateY(20px) scale(1.02)" }} />
-        );
+        return null;
       })}
       <audio
         ref={escena1VoiceRef}

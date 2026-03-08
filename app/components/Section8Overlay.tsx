@@ -794,18 +794,7 @@ export default function Section8Overlay() {
               Pero Pinocho encontró un sitio seguro para refugiarse.
             </div>
           </div>
-        ) : (
-          <img
-            key={image.src}
-            className="scenePhoto"
-            src={image.src}
-            alt={image.alt}
-            style={{
-              transform: "translateY(20px) scale(1.02)",
-              display: showSection8Images ? "block" : "none",
-            }}
-          />
-        )
+        ) : null
       )}
       <audio
         ref={escena1VoiceRef}

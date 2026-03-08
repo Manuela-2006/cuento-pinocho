@@ -461,15 +461,7 @@ export default function Section9Overlay() {
               Y siempre caminó orgulloso junto a su padre.
             </div>
           </div>
-        ) : (
-          <img
-            key={image.src}
-            className="scenePhoto"
-            src={image.src}
-            alt={image.alt}
-            style={{ transform: "translateY(20px) scale(1.02)" }}
-          />
-        )
+        ) : null
       )}
       <audio
         ref={escena1VoiceRef}

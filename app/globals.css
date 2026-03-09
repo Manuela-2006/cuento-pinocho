@@ -1585,7 +1585,7 @@ body.intro-lock .scrollNose {
 
 @media (min-width: 1025px) {
   .scene1Escena2DesktopOffset {
-    transform: translateY(145px) scale(1.02) !important;
+    transform: translateY(230px) scale(1.02) !important;
   }
 }
 

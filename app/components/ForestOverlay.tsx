@@ -573,7 +573,7 @@ export default function ForestOverlay() {
                   style={{
                     position: "absolute",
                     left: "57%",
-                    top: "60%",
+                    top: "67%",
                     transform: "translate(-50%, -50%)",
                     zIndex: 5,
                     whiteSpace: "normal",

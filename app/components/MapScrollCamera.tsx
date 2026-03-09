@@ -97,9 +97,13 @@ export default function MapScrollCamera() {
       }
 
       const sequenceStepConfigs: Array<{ trigger: ScrollTrigger; steps: number }> = [];
-      const wheelBurstResetMs = 220;
+      const wheelBurstResetMs = 180;
+      const wheelBurstMaxMs = 520;
+      const wheelReverseUnlockMs = 120;
       let wheelBurstActive = false;
       let wheelBurstTimer: number | null = null;
+      let wheelBurstStartTs = 0;
+      let wheelBurstDirection = 0;
 
       const getActiveSequenceConfig = () => {
         const currentY = window.scrollY;
@@ -147,13 +151,34 @@ export default function MapScrollCamera() {
         event.stopPropagation();
         (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
 
-        if (wheelBurstActive) return;
+        const now = Date.now();
+        if (wheelBurstActive) {
+          const isReverseIntent = direction !== wheelBurstDirection && now - wheelBurstStartTs >= wheelReverseUnlockMs;
+          if (!isReverseIntent) {
+            const burstDeadline = Math.min(wheelBurstStartTs + wheelBurstMaxMs, now + wheelBurstResetMs);
+            if (wheelBurstTimer !== null) window.clearTimeout(wheelBurstTimer);
+            wheelBurstTimer = window.setTimeout(() => {
+              wheelBurstActive = false;
+              wheelBurstTimer = null;
+            }, Math.max(0, burstDeadline - now));
+            return;
+          }
+
+          if (wheelBurstTimer !== null) {
+            window.clearTimeout(wheelBurstTimer);
+            wheelBurstTimer = null;
+          }
+          wheelBurstActive = false;
+        }
 
         wheelBurstActive = true;
+        wheelBurstStartTs = now;
+        wheelBurstDirection = direction;
+        const firstDeadline = Math.min(wheelBurstStartTs + wheelBurstMaxMs, now + wheelBurstResetMs);
         wheelBurstTimer = window.setTimeout(() => {
           wheelBurstActive = false;
           wheelBurstTimer = null;
-        }, wheelBurstResetMs);
+        }, Math.max(0, firstDeadline - now));
 
         const range = Math.max(1, end - start);
         const targetIndex = Math.min(steps - 1, Math.max(0, currentIndex + direction));

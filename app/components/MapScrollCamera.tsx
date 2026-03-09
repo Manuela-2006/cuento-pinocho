@@ -128,6 +128,21 @@ export default function MapScrollCamera() {
         const activeConfig = getActiveSequenceConfig();
         if (!activeConfig) return;
 
+        const steps = Math.max(1, activeConfig.steps);
+        // Si no hay secuencia real (1 sola escena), no bloquear scroll nativo.
+        if (steps <= 1) return;
+
+        const direction = event.deltaY > 0 ? 1 : -1;
+        const start = Number(activeConfig.trigger.start);
+        const end = Number(activeConfig.trigger.end);
+        const currentProgress = Math.min(0.9999, Math.max(0, activeConfig.trigger.progress));
+        const currentIndex = Math.min(steps - 1, Math.floor(currentProgress * steps));
+        const isTryingToLeaveAtStart = currentIndex === 0 && direction < 0;
+        const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
+
+        // En bordes, permitir scroll nativo para salir del tramo sin bloqueos.
+        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) return;
+
         event.preventDefault();
         event.stopPropagation();
         (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
@@ -147,28 +162,8 @@ export default function MapScrollCamera() {
           wheelBurstTimer = null;
         }, wheelBurstResetMs);
 
-        const direction = event.deltaY > 0 ? 1 : -1;
-        const start = Number(activeConfig.trigger.start);
-        const end = Number(activeConfig.trigger.end);
-        const steps = Math.max(1, activeConfig.steps);
         const range = Math.max(1, end - start);
-        const currentProgress = Math.min(0.9999, Math.max(0, activeConfig.trigger.progress));
-        const currentIndex = Math.min(steps - 1, Math.floor(currentProgress * steps));
         const targetIndex = Math.min(steps - 1, Math.max(0, currentIndex + direction));
-        const isTryingToLeaveAtStart = currentIndex === 0 && direction < 0;
-        const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
-
-        // En bordes, salir del tramo para evitar bloqueo en la primera/última escena.
-        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) {
-          const edgeExitOffset = Math.max(24, Math.round(window.innerHeight * 0.08));
-          const edgeTarget = isTryingToLeaveAtStart
-            ? Math.max(0, start - edgeExitOffset)
-            : end + edgeExitOffset;
-          window.scrollTo({ top: edgeTarget, behavior: "auto" });
-          ScrollTrigger.update();
-          return;
-        }
-
         const targetProgress = (targetIndex + 0.5) / steps;
         const minTarget = start + 1;
         const maxTarget = end - 1;

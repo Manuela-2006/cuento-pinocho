@@ -150,9 +150,9 @@ body:not(.zone-village-active) .villageOverlay .scenePhoto {
 
 .section7DustScene {
   position: absolute;
-  width: min(85vw, 960px);
+  width: var(--scene-max-width);
   aspect-ratio: 1408 / 736;
-  max-height: 80vh;
+  max-height: var(--scene-max-height);
 }
 
 .section7SceneSvgHost {
@@ -182,7 +182,7 @@ body:not(.zone-village-active) .villageOverlay .scenePhoto {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   opacity: 0;
   transform: scale(1);
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -789,12 +789,12 @@ body.section9-active .section9Overlay .scenePhoto {
 
 .scenePhoto {
   position: absolute;
-  max-width: min(85vw, 960px);
-  max-height: 80vh;
+  max-width: var(--scene-max-width);
+  max-height: var(--scene-max-height);
   width: auto;
   height: auto;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   opacity: 0;
   transform: scale(1.02);
@@ -804,11 +804,11 @@ body.section9-active .section9Overlay .scenePhoto {
 .sceneFrame {
   /* MISMAS propiedades que .scenePhoto para que se apilen correctamente */
   position: absolute;
-  max-width: min(85vw, 960px);
-  max-height: 80vh;
+  max-width: var(--scene-max-width);
+  max-height: var(--scene-max-height);
   width: auto;
   height: auto;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   opacity: 0;
   transform: scale(1.02);
@@ -822,7 +822,7 @@ body.section9-active .section9Overlay .scenePhoto {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   display: block;
 }
 
@@ -832,11 +832,12 @@ body.section9-active .section9Overlay .scenePhoto {
   bottom: 16px;
   width: 320px;
   min-height: 140px;
+  max-width: calc(100% - 24px);
   border-radius: 14px;
   background: rgba(248, 237, 219, 0.88);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  padding: 0.8rem 0.8rem;
-  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  padding: var(--scene-text-pad-y) var(--scene-text-pad-x);
+  font-size: var(--scene-text-size);
   line-height: 1.35;
   color: #3c2414;
   font-weight: 600;
@@ -855,11 +856,12 @@ body.section9-active .section9Overlay .scenePhoto {
   bottom: auto;
   width: 380px;
   min-height: 120px;
+  max-width: calc(100% - 24px);
   border-radius: 14px;
   background: rgba(248, 237, 219, 0.88);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  padding: 0.8rem 0.8rem;
-  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  padding: var(--scene-text-pad-y) var(--scene-text-pad-x);
+  font-size: var(--scene-text-size);
   line-height: 1.35;
   color: #3c2414;
   font-weight: 600;
@@ -891,11 +893,12 @@ body.section9-active .section9Overlay .scenePhoto {
   bottom: auto;
   width: 520px;
   min-height: 140px;
+  max-width: calc(100% - 24px);
   border-radius: 14px;
   background: rgba(248, 237, 219, 0.88);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  padding: 0.8rem 0.8rem;
-  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  padding: var(--scene-text-pad-y) var(--scene-text-pad-x);
+  font-size: var(--scene-text-size);
   line-height: 1.35;
   color: #3c2414;
   font-weight: 600;
@@ -913,11 +916,12 @@ body.section9-active .section9Overlay .scenePhoto {
   top: auto;
   width: 360px;
   min-height: 140px;
+  max-width: calc(100% - 24px);
   border-radius: 14px;
   background: rgba(248, 237, 219, 0.88);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  padding: 0.8rem 0.8rem;
-  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  padding: var(--scene-text-pad-y) var(--scene-text-pad-x);
+  font-size: var(--scene-text-size);
   line-height: 1.35;
   color: #3c2414;
   font-weight: 600;
@@ -928,11 +932,11 @@ body.section9-active .section9Overlay .scenePhoto {
 }
 
 .sceneSvg {
-  width: min(85vw, 960px);
-  height: min(80vh, 720px);
+  width: var(--scene-max-width);
+  height: min(var(--scene-max-height), 720px);
   display: grid;
   place-items: center;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   overflow: hidden;
   position: relative;
 }
@@ -942,7 +946,7 @@ body.section9-active .section9Overlay .scenePhoto {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
 }
 
 .sceneSvgVideo {
@@ -951,7 +955,7 @@ body.section9-active .section9Overlay .scenePhoto {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -973,7 +977,7 @@ body.section9-active .section9Overlay .scenePhoto {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: var(--scene-radius);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -1093,6 +1097,12 @@ body.section9-active .section9Overlay .scenePhoto {
 /* Ritmo uniforme: mismo tramo de scroll por escena en todas las secuencias. */
 :root {
   --story-scene-step: 120vh;
+  --scene-max-width: min(85vw, 960px);
+  --scene-max-height: 80vh;
+  --scene-radius: 24px;
+  --scene-text-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  --scene-text-pad-y: 0.8rem;
+  --scene-text-pad-x: 0.8rem;
 }
 
 .geppetto-sequence {
@@ -1552,6 +1562,68 @@ body.intro-lock .scrollNose {
   height: 30px;
   object-fit: contain;
   display: block;
+}
+
+@media (min-width: 1500px) {
+  :root {
+    --scene-max-width: min(80vw, 1240px);
+    --scene-max-height: 84vh;
+    --scene-text-size: clamp(1.12rem, 1.05vw, 1.5rem);
+    --scene-text-pad-y: 0.95rem;
+    --scene-text-pad-x: 0.95rem;
+  }
+}
+
+@media (min-width: 1900px) {
+  :root {
+    --scene-max-width: min(78vw, 1380px);
+    --scene-max-height: 86vh;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --scene-max-width: min(92vw, 920px);
+    --scene-max-height: 78vh;
+    --scene-radius: 18px;
+    --scene-text-size: clamp(0.96rem, 1.9vw, 1.2rem);
+    --scene-text-pad-y: 0.65rem;
+    --scene-text-pad-x: 0.7rem;
+  }
+
+  .sceneCornerBox,
+  .sceneCornerTopLeft,
+  .sceneCornerTopRight,
+  .sceneCornerBottomLeft {
+    width: min(78vw, 460px) !important;
+    max-width: calc(100% - 24px);
+    min-height: auto;
+    line-height: 1.32;
+  }
+
+  .sceneCornerBox,
+  .sceneCornerTopRight {
+    right: 12px;
+    left: auto;
+  }
+
+  .sceneCornerTopLeft,
+  .sceneCornerBottomLeft {
+    left: 12px;
+    right: auto;
+  }
+
+  .sceneCornerBox,
+  .sceneCornerBottomLeft {
+    bottom: 12px;
+    top: auto;
+  }
+
+  .sceneCornerTopLeft,
+  .sceneCornerTopRight {
+    top: 12px;
+    bottom: auto;
+  }
 }
 
 

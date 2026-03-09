@@ -1020,7 +1020,9 @@ body.section9-active .section9Overlay .scenePhoto {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
   pointer-events: none;
   z-index: 100;
-  white-space: nowrap;
+  width: max-content;
+  max-width: min(34vw, 420px);
+  white-space: normal;
   text-align: center;
   line-height: 1.4;
   overflow: visible;
@@ -1100,7 +1102,7 @@ body.section9-active .section9Overlay .scenePhoto {
   --scene-max-width: min(85vw, 960px);
   --scene-max-height: 80vh;
   --scene-radius: 24px;
-  --scene-text-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  --scene-text-size: clamp(1.2rem, 1.75vw, 1.55rem);
   --scene-text-pad-y: 0.8rem;
   --scene-text-pad-x: 0.8rem;
 }
@@ -1568,7 +1570,7 @@ body.intro-lock .scrollNose {
   :root {
     --scene-max-width: min(80vw, 1240px);
     --scene-max-height: 84vh;
-    --scene-text-size: clamp(1.12rem, 1.05vw, 1.5rem);
+    --scene-text-size: clamp(1.28rem, 1.2vw, 1.7rem);
     --scene-text-pad-y: 0.95rem;
     --scene-text-pad-x: 0.95rem;
   }

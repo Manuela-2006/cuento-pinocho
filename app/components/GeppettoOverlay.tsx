@@ -107,6 +107,7 @@ export default function GeppettoOverlay() {
     x: number;
     y: number;
   }>({ show: false, x: 0, y: 0 });
+  const grilloTooltipRef = useRef<HTMLDivElement | null>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [flames, setFlames] = useState<Flame[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -421,6 +422,8 @@ export default function GeppettoOverlay() {
         return "sceneParagraphHero";
     }
   };
+  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
   const handleMouseMoveGrillo = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -436,10 +439,23 @@ export default function GeppettoOverlay() {
       y >= grilloY - grilloSize / 2 &&
       y <= grilloY + grilloSize / 2;
     if (isOverGrillo) {
+      const tooltipWidth = grilloTooltipRef.current?.offsetWidth ?? 320;
+      const tooltipHeight = grilloTooltipRef.current?.offsetHeight ?? 84;
+      const margin = 14;
+
+      let centerX = rect.left + grilloX - 10;
+      centerX = clamp(centerX, margin + tooltipWidth / 2, window.innerWidth - margin - tooltipWidth / 2);
+
+      let top = rect.top + grilloY - tooltipHeight - 22;
+      if (top < margin) {
+        top = rect.top + grilloY + 22;
+      }
+      top = clamp(top, margin, window.innerHeight - margin - tooltipHeight);
+
       setGrilloTooltipData({
         show: true,
-        x: rect.left + grilloX - 80,
-        y: rect.top + grilloY - 80,
+        x: centerX,
+        y: top,
       });
     } else {
       setGrilloTooltipData((prev) => ({ ...prev, show: false }));
@@ -624,8 +640,7 @@ export default function GeppettoOverlay() {
                   style={{
                     position: "relative",
                     overflow: "hidden",
-                    // AJUSTE VERTICAL DE ESCENA 2
-                    transform: "translateY(270px) scale(1.02)",
+                    transform: "translateY(15px) scale(1.02)",
                   }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
@@ -680,6 +695,7 @@ export default function GeppettoOverlay() {
                     {(image as any).text}
                   </div>
                   <div
+                    ref={grilloTooltipRef}
                     className="grilloTooltip"
                     style={{
                       position: "fixed",

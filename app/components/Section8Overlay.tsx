@@ -567,8 +567,9 @@ export default function Section8Overlay() {
             className="scenePhoto sceneFrame"
             style={{
               transform: "translateY(20px) scale(1.02)",
-              width: "min(85vw, 960px)",
-              aspectRatio: "1408 / 768",
+              width: "var(--scene-max-width)",
+              maxHeight: "var(--scene-max-height)",
+              aspectRatio: "1408 / 736",
               overflow: "hidden",
               display: showSection8Images ? "block" : "none",
             }}

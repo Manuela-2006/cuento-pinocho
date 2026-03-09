@@ -1640,4 +1640,38 @@ body.intro-lock .scrollNose {
   }
 }
 
+@media (max-width: 1366px) {
+  .grilloTooltip {
+    font-size: 1.02rem;
+    padding: 0.68rem 1.05rem;
+    max-width: min(36vw, 320px);
+  }
+
+  .grilloTooltipSection7 {
+    left: calc(68% + clamp(24px, 4.2vw, 64px)) !important;
+    top: calc(50% - clamp(52px, 7vw, 78px)) !important;
+  }
+
+  .grilloTooltipSection8Scene1 {
+    left: calc(84.5% - clamp(58px, 11vw, 160px)) !important;
+    top: calc(45% - clamp(70px, 10vw, 128px)) !important;
+  }
+
+  .grilloTooltipSection8Scene3 {
+    top: calc(50% - clamp(56px, 8vw, 92px)) !important;
+  }
+
+  .grilloTooltipIslandScene3 {
+    left: calc(96% - clamp(84px, 15vw, 220px)) !important;
+    top: clamp(22%, 25%, 30%) !important;
+    max-width: min(40vw, 330px) !important;
+  }
+
+  .grilloTooltipIslandScene8 {
+    left: calc(90% - clamp(68px, 12vw, 185px)) !important;
+    top: calc(44% - clamp(6px, 1vw, 14px)) !important;
+    max-width: min(40vw, 330px) !important;
+  }
+}
+
 

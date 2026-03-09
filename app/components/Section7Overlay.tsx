@@ -299,7 +299,7 @@ function Section7Scene3() {
 
       {showPepitoTooltip && (
         <div
-          className="grilloTooltip"
+          className="grilloTooltip grilloTooltipSection7"
           style={{
             position: "absolute",
             left: "calc(68% + clamp(42px, 6vw, 100px))",

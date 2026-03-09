@@ -547,7 +547,7 @@ export default function IslandOverlay() {
               />
               {showScene3PepitoTooltip && (
                 <div
-                  className="grilloTooltip"
+                  className="grilloTooltip grilloTooltipIslandScene3"
                   style={{
                     position: "absolute",
                     left: "calc(96% - clamp(54px, 11vw, 150px))",
@@ -690,7 +690,7 @@ export default function IslandOverlay() {
               />
               {showScene8PepitoTooltip && (
                 <div
-                  className="grilloTooltip"
+                  className="grilloTooltip grilloTooltipIslandScene8"
                   style={{
                     position: "absolute",
                     left: "calc(90% - clamp(42px, 8vw, 130px))",

@@ -533,7 +533,7 @@ export default function Section8Overlay() {
             />
             {showScene1Tooltip && (
               <div
-                className="grilloTooltip"
+                className="grilloTooltip grilloTooltipSection8Scene1"
                 style={{
                   position: "absolute",
                   left: "calc(84.5% - clamp(36px, 7vw, 108px))",
@@ -597,7 +597,7 @@ export default function Section8Overlay() {
             />
             {showScene3Tooltip && (
               <div
-                className="grilloTooltip"
+                className="grilloTooltip grilloTooltipSection8Scene3"
                 style={{
                   position: "absolute",
                   left: "51.5%",

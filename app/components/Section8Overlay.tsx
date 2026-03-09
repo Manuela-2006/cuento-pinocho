@@ -536,8 +536,8 @@ export default function Section8Overlay() {
                 className="grilloTooltip"
                 style={{
                   position: "absolute",
-                  left: "86%",
-                  top: "calc(45% - 130px)",
+                  left: "84.5%",
+                  top: "calc(45% - 150px)",
                   transform: "translate(-50%, -50%)",
                   zIndex: 12,
                 }}

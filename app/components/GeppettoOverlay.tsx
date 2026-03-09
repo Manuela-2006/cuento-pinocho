@@ -443,7 +443,8 @@ export default function GeppettoOverlay() {
       const tooltipHeight = grilloTooltipRef.current?.offsetHeight ?? 84;
       const margin = 14;
 
-      let centerX = rect.left + grilloX - 10;
+      const desktopShiftX = window.innerWidth >= 1025 ? 170 : 10;
+      let centerX = rect.left + grilloX - desktopShiftX;
       centerX = clamp(centerX, margin + tooltipWidth / 2, window.innerWidth - margin - tooltipWidth / 2);
 
       let top = rect.top + grilloY - tooltipHeight - 22;

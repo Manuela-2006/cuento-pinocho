@@ -19,8 +19,9 @@ export default function MapScrollCamera() {
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
-    let triggers: ScrollTrigger[] = [];
+    const triggers: ScrollTrigger[] = [];
     let animationFrameId: number;
+    let removeWheelLock: (() => void) | null = null;
 
     const tryInit = () => {
       let svg = document.querySelector(".mapViewport svg") as SVGSVGElement | null;
@@ -94,6 +95,62 @@ export default function MapScrollCamera() {
         gsap.set(allPhotos, { autoAlpha: 0 });
         allPhotos.forEach((photo) => photo.classList.remove("is-active"));
       }
+
+      const sequenceStepConfigs: Array<{ trigger: ScrollTrigger; steps: number }> = [];
+      const gestureLockMs = 420;
+      let lastGestureTs = 0;
+
+      const getActiveSequenceConfig = () => {
+        const currentY = window.scrollY;
+        const active = sequenceStepConfigs.filter(({ trigger }) => {
+          const start = Number(trigger.start);
+          const end = Number(trigger.end);
+          return trigger.isActive && Number.isFinite(start) && Number.isFinite(end) && currentY >= start && currentY <= end;
+        });
+
+        if (active.length === 0) return null;
+        if (active.length === 1) return active[0];
+
+        active.sort((a, b) => {
+          const aMid = (Number(a.trigger.start) + Number(a.trigger.end)) / 2;
+          const bMid = (Number(b.trigger.start) + Number(b.trigger.end)) / 2;
+          return Math.abs(aMid - currentY) - Math.abs(bMid - currentY);
+        });
+
+        return active[0];
+      };
+
+      const onWheelStepByScene = (event: WheelEvent) => {
+        if (event.ctrlKey) return;
+        if (Math.abs(event.deltaY) < 1) return;
+
+        const activeConfig = getActiveSequenceConfig();
+        if (!activeConfig) return;
+
+        event.preventDefault();
+
+        const now = Date.now();
+        if (now - lastGestureTs < gestureLockMs) return;
+        lastGestureTs = now;
+
+        const direction = event.deltaY > 0 ? 1 : -1;
+        const start = Number(activeConfig.trigger.start);
+        const end = Number(activeConfig.trigger.end);
+        const steps = Math.max(1, activeConfig.steps);
+        const range = Math.max(1, end - start);
+        const stepSize = range / steps;
+        const minTarget = start + 1;
+        const maxTarget = end - 1;
+        const target = Math.min(maxTarget, Math.max(minTarget, window.scrollY + direction * stepSize));
+
+        window.scrollTo({ top: target, behavior: "auto" });
+        ScrollTrigger.update();
+      };
+
+      window.addEventListener("wheel", onWheelStepByScene, { passive: false, capture: true });
+      removeWheelLock = () => {
+        window.removeEventListener("wheel", onWheelStepByScene, { capture: true });
+      };
 
       const setIslandMode = (active: boolean) => {
         document.body.classList.toggle("island-active", active);
@@ -388,6 +445,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(sequenceTrigger);
+        sequenceStepConfigs.push({ trigger: sequenceTrigger, steps: photos.length });
 
       }
 
@@ -472,6 +530,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(villageTrigger);
+        sequenceStepConfigs.push({ trigger: villageTrigger, steps: villagePhotos.length });
 
         // Si se recarga después de la sección del pueblo, forzar ocultar el overlay
         if (window.scrollY > villageSequence.offsetTop + villageSequence.offsetHeight) {
@@ -614,6 +673,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(circusTrigger);
+        sequenceStepConfigs.push({ trigger: circusTrigger, steps: circusPhotos.length });
 
         // Si se recarga después de la sección del circo, forzar ocultar el overlay
         if (window.scrollY > circusSequence.offsetTop + circusSequence.offsetHeight) {
@@ -728,6 +788,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(forestTrigger);
+        sequenceStepConfigs.push({ trigger: forestTrigger, steps: forestPhotos.length });
 
         if (window.scrollY > forestSequence.offsetTop + forestSequence.offsetHeight) {
           gsap.set(forestOverlay, { autoAlpha: 0 });
@@ -845,6 +906,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(islandTrigger);
+        sequenceStepConfigs.push({ trigger: islandTrigger, steps: islandPhotos.length });
 
         const islandStart = islandSequence.offsetTop - window.innerHeight / 2;
         if (window.scrollY >= islandStart) {
@@ -988,6 +1050,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(section7Trigger);
+        sequenceStepConfigs.push({ trigger: section7Trigger, steps: section7Photos.length });
 
         const section7Start = section7Sequence.offsetTop - window.innerHeight / 2;
         if (window.scrollY >= section7Start) {
@@ -1143,6 +1206,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(section8Trigger);
+        sequenceStepConfigs.push({ trigger: section8Trigger, steps: section8Photos.length });
 
         const section8Start = section8Sequence.offsetTop - window.innerHeight / 2;
         if (
@@ -1300,6 +1364,7 @@ export default function MapScrollCamera() {
         });
 
         triggers.push(section9Trigger);
+        sequenceStepConfigs.push({ trigger: section9Trigger, steps: section9Photos.length });
 
         const section9Start = section9Sequence.offsetTop;
         if (
@@ -1372,6 +1437,7 @@ export default function MapScrollCamera() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      if (removeWheelLock) removeWheelLock();
       triggers.forEach((t) => t.kill());
       document.body.classList.remove("island-active");
       document.body.classList.remove("section7-active");

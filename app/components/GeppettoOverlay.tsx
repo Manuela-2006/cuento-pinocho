@@ -649,7 +649,11 @@ export default function GeppettoOverlay() {
                   }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
-                  <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
+                  <div
+                    className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}${
+                      image.src === "/seccion2/Escena3.jpg" ? " scene2Escena3LaptopShift" : ""
+                    }`}
+                  >
                     {(image as any).text}
                   </div>
                   {flames.map((flame) => (

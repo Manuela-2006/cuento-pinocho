@@ -1583,7 +1583,13 @@ body.intro-lock .scrollNose {
   }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1025px) and (max-width: 1399px), (min-width: 1025px) and (max-height: 899px) {
+  .scene1Escena2DesktopOffset {
+    transform: translateY(clamp(90px, 14vh, 170px)) scale(1.02) !important;
+  }
+}
+
+@media (min-width: 1400px) and (min-height: 900px) {
   .scene1Escena2DesktopOffset {
     transform: translateY(375px) scale(1.02) !important;
   }

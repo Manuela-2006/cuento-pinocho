@@ -550,12 +550,11 @@ export default function IslandOverlay() {
                   className="grilloTooltip"
                   style={{
                     position: "absolute",
-                    left: "96%",
-                    top: "20%",
+                    left: "calc(96% - clamp(54px, 11vw, 150px))",
+                    top: "clamp(20%, 22%, 26%)",
                     transform: "translate(-50%, -50%)",
                     zIndex: 5,
-                    whiteSpace: "nowrap",
-                    maxWidth: "none",
+                    maxWidth: "min(38vw, 360px)",
                   }}
                 >
                   !Pinocho ten cuidado, puede ser
@@ -694,12 +693,11 @@ export default function IslandOverlay() {
                   className="grilloTooltip"
                   style={{
                     position: "absolute",
-                    left: "90%",
-                    top: "44%",
+                    left: "calc(90% - clamp(42px, 8vw, 130px))",
+                    top: "calc(44% - clamp(8px, 1.5vw, 18px))",
                     transform: "translate(-50%, -50%)",
                     zIndex: 5,
-                    whiteSpace: "nowrap",
-                    maxWidth: "none",
+                    maxWidth: "min(38vw, 360px)",
                   }}
                 >
                   Ay Pinocho ya te advertí que

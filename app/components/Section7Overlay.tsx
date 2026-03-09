@@ -302,8 +302,8 @@ function Section7Scene3() {
           className="grilloTooltip"
           style={{
             position: "absolute",
-            left: "calc(68% + 100px)",
-            top: "calc(50% - 90px)",
+            left: "calc(68% + clamp(42px, 6vw, 100px))",
+            top: "calc(50% - clamp(58px, 8vw, 90px))",
             transform: "translate(-50%, -50%)",
             zIndex: 12,
           }}

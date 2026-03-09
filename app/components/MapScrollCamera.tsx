@@ -97,8 +97,9 @@ export default function MapScrollCamera() {
       }
 
       const sequenceStepConfigs: Array<{ trigger: ScrollTrigger; steps: number }> = [];
-      const gestureLockMs = 420;
-      let lastGestureTs = 0;
+      const wheelBurstResetMs = 220;
+      let wheelBurstActive = false;
+      let wheelBurstTimer: number | null = null;
 
       const getActiveSequenceConfig = () => {
         const currentY = window.scrollY;
@@ -128,20 +129,36 @@ export default function MapScrollCamera() {
         if (!activeConfig) return;
 
         event.preventDefault();
+        event.stopPropagation();
+        (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
 
-        const now = Date.now();
-        if (now - lastGestureTs < gestureLockMs) return;
-        lastGestureTs = now;
+        if (wheelBurstActive) {
+          if (wheelBurstTimer !== null) window.clearTimeout(wheelBurstTimer);
+          wheelBurstTimer = window.setTimeout(() => {
+            wheelBurstActive = false;
+            wheelBurstTimer = null;
+          }, wheelBurstResetMs);
+          return;
+        }
+
+        wheelBurstActive = true;
+        wheelBurstTimer = window.setTimeout(() => {
+          wheelBurstActive = false;
+          wheelBurstTimer = null;
+        }, wheelBurstResetMs);
 
         const direction = event.deltaY > 0 ? 1 : -1;
         const start = Number(activeConfig.trigger.start);
         const end = Number(activeConfig.trigger.end);
         const steps = Math.max(1, activeConfig.steps);
         const range = Math.max(1, end - start);
-        const stepSize = range / steps;
+        const currentProgress = Math.min(0.9999, Math.max(0, activeConfig.trigger.progress));
+        const currentIndex = Math.min(steps - 1, Math.floor(currentProgress * steps));
+        const targetIndex = Math.min(steps - 1, Math.max(0, currentIndex + direction));
+        const targetProgress = (targetIndex + 0.5) / steps;
         const minTarget = start + 1;
         const maxTarget = end - 1;
-        const target = Math.min(maxTarget, Math.max(minTarget, window.scrollY + direction * stepSize));
+        const target = Math.min(maxTarget, Math.max(minTarget, start + targetProgress * range));
 
         window.scrollTo({ top: target, behavior: "auto" });
         ScrollTrigger.update();
@@ -149,6 +166,10 @@ export default function MapScrollCamera() {
 
       window.addEventListener("wheel", onWheelStepByScene, { passive: false, capture: true });
       removeWheelLock = () => {
+        if (wheelBurstTimer !== null) {
+          window.clearTimeout(wheelBurstTimer);
+          wheelBurstTimer = null;
+        }
         window.removeEventListener("wheel", onWheelStepByScene, { capture: true });
       };
 

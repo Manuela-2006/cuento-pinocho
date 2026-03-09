@@ -147,14 +147,7 @@ export default function MapScrollCamera() {
         event.stopPropagation();
         (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
 
-        if (wheelBurstActive) {
-          if (wheelBurstTimer !== null) window.clearTimeout(wheelBurstTimer);
-          wheelBurstTimer = window.setTimeout(() => {
-            wheelBurstActive = false;
-            wheelBurstTimer = null;
-          }, wheelBurstResetMs);
-          return;
-        }
+        if (wheelBurstActive) return;
 
         wheelBurstActive = true;
         wheelBurstTimer = window.setTimeout(() => {

@@ -435,8 +435,8 @@ export default function CircusOverlay() {
                 if (isOverGrillo) {
                   setGrilloTooltipData({
                     show: true,
-                    x: rect.left + rect.width * 0.5,
-                    y: rect.top + rect.height - 470,
+                    x: rect.left + rect.width * 0.47,
+                    y: rect.top + rect.height - 495,
                   });
                 } else {
                   setGrilloTooltipData((prev) => ({ ...prev, show: false }));

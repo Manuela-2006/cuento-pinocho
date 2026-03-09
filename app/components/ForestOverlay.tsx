@@ -459,7 +459,7 @@ export default function ForestOverlay() {
                   className="grilloTooltip"
                   style={{
                     position: "absolute",
-                    left: "68%",
+                    left: "71%",
                     top: "52%",
                     transform: "translate(-50%, -50%)",
                     zIndex: 5,

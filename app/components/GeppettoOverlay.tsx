@@ -636,14 +636,12 @@ export default function GeppettoOverlay() {
               return (
                 <div
                   key={image.src}
-                  className="scenePhoto sceneFrame"
+                  className="scenePhoto sceneFrame scene1Escena2DesktopOffset"
                   onMouseMove={handleMouseMoveWood}
                   style={{
                     position: "relative",
                     overflow: "hidden",
-                    transform: `${
-                      typeof window !== "undefined" && window.innerWidth >= 1025 ? "translateY(95px)" : "translateY(15px)"
-                    } scale(1.02)`,
+                    transform: "translateY(15px) scale(1.02)",
                   }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />

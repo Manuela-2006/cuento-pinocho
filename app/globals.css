@@ -1583,6 +1583,12 @@ body.intro-lock .scrollNose {
   }
 }
 
+@media (min-width: 1025px) {
+  .scene1Escena2DesktopOffset {
+    transform: translateY(105px) scale(1.02) !important;
+  }
+}
+
 @media (max-width: 1024px) {
   :root {
     --scene-max-width: min(92vw, 920px);

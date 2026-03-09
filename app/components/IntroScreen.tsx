@@ -209,9 +209,9 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
         <button type="button" className={styles.audioUnlock} onClick={unlockAudio}>
           <span>Toca para iniciar</span>
           <span className={styles.audioUnlockHint}>
-            Recuerda pulsar y mover el ratón en ciertas zonas para descubrir
+            Recuarda pulsar en ciertas partes de las escenas o mover el puntero del ratón sobre todo
             <br />
-            efectos y sonidos escondidos en esta maravillosa historia
+            encima de Pepito Grillo para descubrir efectos y sonidos escondidos en esta maravillosa historia
           </span>
         </button>
       )}

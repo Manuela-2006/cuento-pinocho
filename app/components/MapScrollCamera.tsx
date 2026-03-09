@@ -155,6 +155,20 @@ export default function MapScrollCamera() {
         const currentProgress = Math.min(0.9999, Math.max(0, activeConfig.trigger.progress));
         const currentIndex = Math.min(steps - 1, Math.floor(currentProgress * steps));
         const targetIndex = Math.min(steps - 1, Math.max(0, currentIndex + direction));
+        const isTryingToLeaveAtStart = currentIndex === 0 && direction < 0;
+        const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
+
+        // En bordes, salir del tramo para evitar bloqueo en la primera/última escena.
+        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) {
+          const edgeExitOffset = Math.max(24, Math.round(window.innerHeight * 0.08));
+          const edgeTarget = isTryingToLeaveAtStart
+            ? Math.max(0, start - edgeExitOffset)
+            : end + edgeExitOffset;
+          window.scrollTo({ top: edgeTarget, behavior: "auto" });
+          ScrollTrigger.update();
+          return;
+        }
+
         const targetProgress = (targetIndex + 0.5) / steps;
         const minTarget = start + 1;
         const maxTarget = end - 1;

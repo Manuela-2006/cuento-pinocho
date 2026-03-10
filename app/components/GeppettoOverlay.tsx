@@ -447,7 +447,7 @@ export default function GeppettoOverlay() {
       const viewportWidth = window.innerWidth;
       const isDesktop = viewportWidth >= 1025;
       const isLaptop = viewportWidth >= 1025 && viewportWidth <= 1600;
-      const desktopShiftX = isLaptop ? 20 : isDesktop ? 195 : 10;
+      const desktopShiftX = isLaptop ? 85 : isDesktop ? 195 : 10;
       let centerX = rect.left + grilloX - desktopShiftX;
       centerX = clamp(centerX, margin + tooltipWidth / 2, window.innerWidth - margin - tooltipWidth / 2);
 

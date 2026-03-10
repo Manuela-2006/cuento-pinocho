@@ -1672,6 +1672,11 @@ body.intro-lock .scrollNose {
     top: calc(44% - clamp(6px, 1vw, 14px)) !important;
     max-width: min(40vw, 330px) !important;
   }
+
+  .grilloTooltipForestScene5 {
+    left: 60% !important;
+    top: 64% !important;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1920px) {

@@ -569,7 +569,7 @@ export default function ForestOverlay() {
               />
               {showScene5GrilloTooltip && (
                 <div
-                  className="grilloTooltip"
+                  className="grilloTooltip grilloTooltipForestScene5"
                   style={{
                     position: "absolute",
                     left: "57%",

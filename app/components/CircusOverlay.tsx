@@ -431,6 +431,7 @@ export default function CircusOverlay() {
                   x <= rect.width * 0.62 &&
                   y >= rect.height * 0.7 &&
                   y <= rect.height * 0.9;
+                event.currentTarget.style.cursor = isOverGrillo ? "pointer" : "default";
 
                 if (isOverGrillo) {
                   const viewportWidth = window.innerWidth;
@@ -444,7 +445,8 @@ export default function CircusOverlay() {
                   setGrilloTooltipData((prev) => ({ ...prev, show: false }));
                 }
               }}
-              onPointerLeave={() => {
+              onPointerLeave={(event) => {
+                event.currentTarget.style.cursor = "default";
                 setGrilloTooltipData((prev) => ({ ...prev, show: false }));
               }}
             >

@@ -439,6 +439,7 @@ export default function GeppettoOverlay() {
       x <= grilloX + grilloSize / 2 &&
       y >= grilloY - grilloSize / 2 &&
       y <= grilloY + grilloSize / 2;
+    event.currentTarget.style.cursor = isOverGrillo ? "pointer" : "default";
     if (isOverGrillo) {
       const tooltipWidth = grilloTooltipRef.current?.offsetWidth ?? 320;
       const tooltipHeight = grilloTooltipRef.current?.offsetHeight ?? 84;
@@ -699,7 +700,10 @@ export default function GeppettoOverlay() {
                   key={image.src}
                   className="scenePhoto sceneFrame"
                   onMouseMove={handleMouseMoveGrillo}
-                  onMouseLeave={() => setGrilloTooltipData((prev) => ({ ...prev, show: false }))}
+                  onMouseLeave={(event) => {
+                    event.currentTarget.style.cursor = "default";
+                    setGrilloTooltipData((prev) => ({ ...prev, show: false }));
+                  }}
                   style={{ transform: "translateY(15px) scale(1.02)" }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />

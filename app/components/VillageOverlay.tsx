@@ -92,6 +92,7 @@ export default function VillageOverlay() {
       event.clientX <= box.right &&
       event.clientY >= box.top &&
       event.clientY <= box.bottom;
+    event.currentTarget.style.cursor = isOverGrillo ? "pointer" : "default";
 
     if (isOverGrillo) {
       const viewportWidth = window.innerWidth;
@@ -351,7 +352,8 @@ export default function VillageOverlay() {
                     }
                   }
                 }}
-                onPointerLeave={() => {
+                onPointerLeave={(event) => {
+                  event.currentTarget.style.cursor = "default";
                   setIsHoveringMusic(false);
                   setGrilloTooltipData({ show: false, x: 0, y: 0 });
                   pendingVideoAudioUnlockRef.current = false;

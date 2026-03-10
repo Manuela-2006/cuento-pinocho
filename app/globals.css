@@ -1674,11 +1674,11 @@ body.intro-lock .scrollNose {
   }
 }
 
-@media (hover: hover) and (pointer: fine) and (min-width: 768px) and (max-width: 1920px) {
+@media (min-width: 768px) and (max-width: 1920px) {
   .scene1Escena2DesktopOffset .scene1Escena2LaptopBubbleShift.sceneCornerBottomLeft {
-    left: 16px !important;
-    right: auto !important;
-    transform: translateX(clamp(260px, 22vw, 520px)) !important;
+    left: auto !important;
+    right: 16px !important;
+    transform: none !important;
   }
 
   .scene2Escena3LaptopShift {

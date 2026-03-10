@@ -651,6 +651,8 @@ export default function GeppettoOverlay() {
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div
                     className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}${
+                      image.src === "/seccion1/Escena2.jpg" ? " scene1Escena2LaptopBubbleShift" : ""
+                    }${
                       image.src === "/seccion2/Escena3.jpg" ? " scene2Escena3LaptopShift" : ""
                     }`}
                   >

@@ -94,11 +94,13 @@ export default function VillageOverlay() {
       event.clientY <= box.bottom;
 
     if (isOverGrillo) {
-      const isDesktop = window.innerWidth >= 1025;
+      const viewportWidth = window.innerWidth;
+      const isDesktop = viewportWidth >= 1025;
+      const isLaptop = viewportWidth >= 1025 && viewportWidth <= 1600;
       setGrilloTooltipData({
         show: true,
         x: box.left + box.width / 2 + 80,
-        y: isDesktop ? box.top - 20 : box.top - 60,
+        y: isLaptop ? box.top - 45 : isDesktop ? box.top - 20 : box.top - 60,
       });
     } else {
       setGrilloTooltipData(prev => ({ ...prev, show: false }));

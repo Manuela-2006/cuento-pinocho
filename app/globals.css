@@ -1676,7 +1676,7 @@ body.intro-lock .scrollNose {
 
 @media (min-width: 1025px) and (max-width: 1366px) {
   .scene1Escena2LaptopBubbleShift {
-    left: clamp(130px, 10vw, 210px);
+    left: clamp(220px, 18vw, 360px);
   }
 
   .scene2Escena3LaptopShift {

@@ -1136,7 +1136,7 @@ button[aria-label*="Pepito Grillo"]::after {
   pointer-events: none;
   z-index: 10;
   opacity: 0;
-  animation-duration: 45s;
+  animation-duration: 2s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }

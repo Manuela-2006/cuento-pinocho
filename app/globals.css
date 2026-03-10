@@ -1653,7 +1653,7 @@ body.intro-lock .scrollNose {
   }
 
   .grilloTooltipSection8Scene1 {
-    left: calc(84.5% - clamp(58px, 11vw, 160px)) !important;
+    left: calc(88% - clamp(44px, 8.5vw, 130px)) !important;
     top: calc(45% - clamp(70px, 10vw, 128px)) !important;
   }
 

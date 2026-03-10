@@ -433,10 +433,12 @@ export default function CircusOverlay() {
                   y <= rect.height * 0.9;
 
                 if (isOverGrillo) {
+                  const viewportWidth = window.innerWidth;
+                  const isLaptop = viewportWidth >= 1025 && viewportWidth <= 1600;
                   setGrilloTooltipData({
                     show: true,
-                    x: rect.left + rect.width * 0.47,
-                    y: rect.top + rect.height - 495,
+                    x: rect.left + rect.width * 0.47 + (isLaptop ? 40 : 0),
+                    y: rect.top + rect.height - 495 + (isLaptop ? 140 : 0),
                   });
                 } else {
                   setGrilloTooltipData((prev) => ({ ...prev, show: false }));

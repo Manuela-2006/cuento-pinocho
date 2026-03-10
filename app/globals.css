@@ -1668,7 +1668,7 @@ body.intro-lock .scrollNose {
   }
 
   .grilloTooltipIslandScene8 {
-    left: calc(90% - clamp(68px, 12vw, 185px)) !important;
+    left: calc(94% - clamp(56px, 10vw, 150px)) !important;
     top: calc(44% - clamp(6px, 1vw, 14px)) !important;
     max-width: min(40vw, 330px) !important;
   }

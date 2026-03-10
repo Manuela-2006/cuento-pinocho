@@ -1675,14 +1675,8 @@ body.intro-lock .scrollNose {
 }
 
 @media (min-width: 768px) and (max-width: 1920px) {
-  .scene1Escena2DesktopOffset .scene1Escena2LaptopBubbleShift.sceneCornerBottomLeft {
-    left: auto !important;
-    right: 16px !important;
-    transform: none !important;
-  }
-
   .scene2Escena3LaptopShift {
-    left: clamp(120px, 11vw, 190px);
+    left: clamp(260px, 22vw, 460px) !important;
   }
 }
 

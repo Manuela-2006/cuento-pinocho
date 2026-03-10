@@ -100,7 +100,6 @@ export default function GeppettoOverlay() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAfterVideo, setShowAfterVideo] = useState(false);
   const [isFading, setIsFading] = useState(false);
-  const [isLaptopViewport, setIsLaptopViewport] = useState(false);
   const [voiceOverEnabled, setVoiceOverEnabled] = useState(false);
   const [activeGeppettoIndex, setActiveGeppettoIndex] = useState<number | null>(null);
   const [grilloTooltipData, setGrilloTooltipData] = useState<{
@@ -256,16 +255,6 @@ export default function GeppettoOverlay() {
     return () => window.removeEventListener("pinocho-audio-settings", handleAudioSettings);
   }, []);
 
-  useEffect(() => {
-    const updateViewportType = () => {
-      const width = window.innerWidth;
-      setIsLaptopViewport(width >= 768 && width <= 1600);
-    };
-
-    updateViewportType();
-    window.addEventListener("resize", updateViewportType);
-    return () => window.removeEventListener("resize", updateViewportType);
-  }, []);
   useEffect(() => {
     const escena1Audio = escena1VoiceRef.current;
     const escena2Audio = escena2VoiceRef.current;
@@ -663,15 +652,8 @@ export default function GeppettoOverlay() {
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
                   <div
                     className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}${
-                      image.src === "/seccion1/Escena2.jpg" ? " scene1Escena2LaptopBubbleShift" : ""
-                    }${
                       image.src === "/seccion2/Escena3.jpg" ? " scene2Escena3LaptopShift" : ""
                     }`}
-                    style={
-                      image.src === "/seccion1/Escena2.jpg" && isLaptopViewport
-                        ? { left: "45%", right: "auto", bottom: "16px" }
-                        : undefined
-                    }
                   >
                     {(image as any).text}
                   </div>

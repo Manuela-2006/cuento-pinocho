@@ -434,6 +434,9 @@ export default function VillageOverlay() {
           }}
         >
           ¡Pinocho!, recuerda que<br />tienes que ir a la escuela
+          <span className="tooltipSparkle tooltipSparkleA" aria-hidden="true" />
+          <span className="tooltipSparkle tooltipSparkleB" aria-hidden="true" />
+          <span className="tooltipSparkle tooltipSparkleC" aria-hidden="true" />
           <span className="thoughtTail" aria-hidden="true" />
         </div>
       )}

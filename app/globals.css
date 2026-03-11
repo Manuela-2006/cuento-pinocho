@@ -1206,6 +1206,65 @@ button[aria-label*="Pepito Grillo"]::after,
   top: 74%;
 }
 
+@keyframes pepitoTooltipSparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6) rotate(45deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+  45% {
+    opacity: 0.35;
+    transform: scale(1.15) rotate(45deg);
+  }
+  60% {
+    opacity: 0;
+    transform: scale(1.25) rotate(45deg);
+  }
+}
+
+.grilloTooltipPepitoSparkles .tooltipSparkle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 11;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 247, 186, 0.95) 35%,
+    rgba(176, 234, 255, 0.8) 68%,
+    rgba(176, 234, 255, 0) 100%
+  );
+  box-shadow:
+    0 0 6px rgba(255, 247, 186, 0.9),
+    0 0 12px rgba(176, 234, 255, 0.6);
+  animation: pepitoTooltipSparkle 1.8s ease-in-out infinite;
+}
+
+.grilloTooltipPepitoSparkles .tooltipSparkleA {
+  left: 10%;
+  top: -8px;
+  animation-delay: 0s;
+}
+
+.grilloTooltipPepitoSparkles .tooltipSparkleB {
+  right: 14%;
+  top: -10px;
+  animation-delay: 0.55s;
+}
+
+.grilloTooltipPepitoSparkles .tooltipSparkleC {
+  right: 8%;
+  bottom: -8px;
+  animation-delay: 1.05s;
+}
+
 .pepitoMagicHintGeppetto {
   left: 82%;
   top: 28%;

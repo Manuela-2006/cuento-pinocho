@@ -533,7 +533,7 @@ export default function Section8Overlay() {
             />
             {showScene1Tooltip && (
               <div
-                className="grilloTooltip grilloTooltipSection8Scene1"
+                className="grilloTooltip grilloTooltipSection8Scene1 grilloTooltipPepitoSparkles"
                 style={{
                   position: "absolute",
                   left: "calc(84.5% - clamp(36px, 7vw, 108px))",
@@ -545,6 +545,9 @@ export default function Section8Overlay() {
                 Mira pinocho
                 <br />
                 una Ballena!
+                <span className="tooltipSparkle tooltipSparkleA" aria-hidden="true" />
+                <span className="tooltipSparkle tooltipSparkleB" aria-hidden="true" />
+                <span className="tooltipSparkle tooltipSparkleC" aria-hidden="true" />
                 <span className="thoughtTail" aria-hidden="true" />
               </div>
             )}
@@ -597,7 +600,7 @@ export default function Section8Overlay() {
             />
             {showScene3Tooltip && (
               <div
-                className="grilloTooltip grilloTooltipSection8Scene3"
+                className="grilloTooltip grilloTooltipSection8Scene3 grilloTooltipPepitoSparkles"
                 style={{
                   position: "absolute",
                   left: "51.5%",
@@ -609,6 +612,9 @@ export default function Section8Overlay() {
                 &iquest;Escuchas eso
                 <br />
                 Pinocho?
+                <span className="tooltipSparkle tooltipSparkleA" aria-hidden="true" />
+                <span className="tooltipSparkle tooltipSparkleB" aria-hidden="true" />
+                <span className="tooltipSparkle tooltipSparkleC" aria-hidden="true" />
                 <span className="thoughtTail" aria-hidden="true" />
               </div>
             )}

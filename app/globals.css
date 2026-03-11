@@ -1337,6 +1337,11 @@ button[aria-label*="Pepito Grillo"]:hover::after,
   opacity: 0 !important;
 }
 
+button[aria-label="Pepito Grillo Escena 5"]::before,
+button[aria-label="Pepito Grillo Escena 5"]::after {
+  left: 40%;
+}
+
 .videoHintPaused .videoMagicHint::before,
 .videoHintPaused .videoMagicHint::after {
   animation-play-state: paused;

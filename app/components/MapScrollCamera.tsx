@@ -97,13 +97,8 @@ export default function MapScrollCamera() {
       }
 
       const sequenceStepConfigs: Array<{ trigger: ScrollTrigger; steps: number }> = [];
-      const wheelBurstResetMs = 180;
-      const wheelBurstMaxMs = 520;
-      const wheelReverseUnlockMs = 120;
-      let wheelBurstActive = false;
-      let wheelBurstTimer: number | null = null;
-      let wheelBurstStartTs = 0;
-      let wheelBurstDirection = 0;
+      const wheelStepLockMs = 420;
+      let wheelStepLockUntil = 0;
 
       const getActiveSequenceConfig = () => {
         const currentY = window.scrollY;
@@ -147,38 +142,19 @@ export default function MapScrollCamera() {
         // En bordes, permitir scroll nativo para salir del tramo sin bloqueos.
         if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) return;
 
+        const now = Date.now();
+        // Un único cambio de escena por gesto/ráfaga de rueda.
+        if (now < wheelStepLockUntil) {
+          event.preventDefault();
+          event.stopPropagation();
+          (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+          return;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
-
-        const now = Date.now();
-        if (wheelBurstActive) {
-          const isReverseIntent = direction !== wheelBurstDirection && now - wheelBurstStartTs >= wheelReverseUnlockMs;
-          if (!isReverseIntent) {
-            const burstDeadline = Math.min(wheelBurstStartTs + wheelBurstMaxMs, now + wheelBurstResetMs);
-            if (wheelBurstTimer !== null) window.clearTimeout(wheelBurstTimer);
-            wheelBurstTimer = window.setTimeout(() => {
-              wheelBurstActive = false;
-              wheelBurstTimer = null;
-            }, Math.max(0, burstDeadline - now));
-            return;
-          }
-
-          if (wheelBurstTimer !== null) {
-            window.clearTimeout(wheelBurstTimer);
-            wheelBurstTimer = null;
-          }
-          wheelBurstActive = false;
-        }
-
-        wheelBurstActive = true;
-        wheelBurstStartTs = now;
-        wheelBurstDirection = direction;
-        const firstDeadline = Math.min(wheelBurstStartTs + wheelBurstMaxMs, now + wheelBurstResetMs);
-        wheelBurstTimer = window.setTimeout(() => {
-          wheelBurstActive = false;
-          wheelBurstTimer = null;
-        }, Math.max(0, firstDeadline - now));
+        wheelStepLockUntil = now + wheelStepLockMs;
 
         const range = Math.max(1, end - start);
         const targetIndex = Math.min(steps - 1, Math.max(0, currentIndex + direction));
@@ -187,16 +163,12 @@ export default function MapScrollCamera() {
         const maxTarget = end - 1;
         const target = Math.min(maxTarget, Math.max(minTarget, start + targetProgress * range));
 
-        window.scrollTo({ top: target, behavior: "auto" });
+        window.scrollTo({ top: target, behavior: "smooth" });
         ScrollTrigger.update();
       };
 
       window.addEventListener("wheel", onWheelStepByScene, { passive: false, capture: true });
       removeWheelLock = () => {
-        if (wheelBurstTimer !== null) {
-          window.clearTimeout(wheelBurstTimer);
-          wheelBurstTimer = null;
-        }
         window.removeEventListener("wheel", onWheelStepByScene, { capture: true });
       };
 

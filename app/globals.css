@@ -1132,14 +1132,17 @@ body.section9-active .section9Overlay .scenePhoto {
 }
 
 button[aria-label*="Pepito Grillo"],
-.pepitoMagicHint {
+.pepitoMagicHint,
+.grilloTooltipPepitoSparkles {
   isolation: isolate;
 }
 
 button[aria-label*="Pepito Grillo"]::before,
 button[aria-label*="Pepito Grillo"]::after,
 .pepitoMagicHint::before,
-.pepitoMagicHint::after {
+.pepitoMagicHint::after,
+.grilloTooltipPepitoSparkles::before,
+.grilloTooltipPepitoSparkles::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -1153,7 +1156,8 @@ button[aria-label*="Pepito Grillo"]::after,
 }
 
 button[aria-label*="Pepito Grillo"]::before,
-.pepitoMagicHint::before {
+.pepitoMagicHint::before,
+.grilloTooltipPepitoSparkles::before {
   width: clamp(42px, 5vw, 70px);
   height: clamp(42px, 5vw, 70px);
   border-radius: 999px;
@@ -1169,7 +1173,8 @@ button[aria-label*="Pepito Grillo"]::before,
 }
 
 button[aria-label*="Pepito Grillo"]::after,
-.pepitoMagicHint::after {
+.pepitoMagicHint::after,
+.grilloTooltipPepitoSparkles::after {
   width: clamp(78px, 8vw, 120px);
   height: clamp(78px, 8vw, 120px);
   border-radius: 999px;
@@ -1189,6 +1194,16 @@ button[aria-label*="Pepito Grillo"]::after,
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 9;
+}
+
+.grilloTooltipPepitoSparkles::before {
+  left: 18%;
+  top: 18%;
+}
+
+.grilloTooltipPepitoSparkles::after {
+  left: 82%;
+  top: 74%;
 }
 
 .pepitoMagicHintGeppetto {

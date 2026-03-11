@@ -423,7 +423,7 @@ export default function VillageOverlay() {
 
       {grilloTooltipData.show && grilloTooltipData.x > 0 && grilloTooltipData.y > 0 && (
         <div
-          className="grilloTooltip"
+          className="grilloTooltip grilloTooltipPepitoSparkles"
           style={{
             position: "fixed",
             left: `${grilloTooltipData.x}px`,

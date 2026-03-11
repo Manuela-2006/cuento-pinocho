@@ -1309,6 +1309,26 @@ button[aria-label*="Pepito Grillo"]::after,
   top: 46.1%;
 }
 
+.videoMagicHintCircusScene2Confetti {
+  left: 25%;
+  top: 25%;
+}
+
+.videoMagicHintCircusScene5Fairy {
+  left: 70%;
+  top: 50%;
+}
+
+.videoMagicHintForestScene2Coin {
+  left: 42%;
+  top: 50%;
+}
+
+.videoMagicHintSection9Scene2Gold {
+  left: calc(50% - 165px);
+  top: 52%;
+}
+
 button[aria-label*="Pepito Grillo"]:hover::before,
 button[aria-label*="Pepito Grillo"]:hover::after,
 .pepitoHintPaused .pepitoMagicHint::before,

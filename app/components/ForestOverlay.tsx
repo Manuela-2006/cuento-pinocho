@@ -331,10 +331,11 @@ export default function ForestOverlay() {
           return (
             <div
               key={image.src}
-              className="scenePhoto sceneFrame"
+              className={`scenePhoto sceneFrame${scene2Sparkles.length > 0 ? " videoHintPaused" : ""}`}
               style={{ transform: "translateY(20px) scale(1.02)" }}
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+              <span className="videoMagicHint videoMagicHintForestScene2Coin" aria-hidden="true" />
               {scene2Sparkles.map((sparkle) => (
                 <div
                   key={sparkle.id}

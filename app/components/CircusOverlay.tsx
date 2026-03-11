@@ -48,12 +48,14 @@ export default function CircusOverlay() {
   const [fairyParticles, setFairyParticles] = useState<
     { id: number; x: number; y: number; size: number; duration: number; delay: number }[]
   >([]);
+  const [isHoveringFairyZone, setIsHoveringFairyZone] = useState(false);
   const fairyIdRef = useRef(0);
   const [grilloTooltipData, setGrilloTooltipData] = useState<{
     show: boolean;
     x: number;
     y: number;
   }>({ show: false, x: 0, y: 0 });
+  const [isHoveringConfettiZone, setIsHoveringConfettiZone] = useState(false);
   const scene5FrameRef = useRef<HTMLDivElement | null>(null);
   const escena4AudioRef = useRef<HTMLAudioElement | null>(null);
   const fairyAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -363,11 +365,20 @@ export default function CircusOverlay() {
           return (
             <div
               key={image.src}
-              className="scenePhoto sceneFrame"
+              className={`scenePhoto sceneFrame${isHoveringConfettiZone ? " videoHintPaused" : ""}`}
               style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}
-              onPointerMove={spawnConfetti}
+              onPointerMove={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const inConfettiZone = x <= rect.width * 0.5 && y <= rect.height * 0.5;
+                setIsHoveringConfettiZone(inConfettiZone);
+                spawnConfetti(event);
+              }}
+              onPointerLeave={() => setIsHoveringConfettiZone(false)}
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+              <span className="videoMagicHint videoMagicHintCircusScene2Confetti" aria-hidden="true" />
               <div className="sceneCornerBox sceneParagraphHero" style={{ width: "300px" }}>
                 Pinocho cantó y bailó sobre el escenario.
                 El público aplaudía con entusiasmo y él se sentía feliz, importante y famoso.
@@ -499,12 +510,36 @@ export default function CircusOverlay() {
             <div
               key={image.src}
               ref={scene5FrameRef}
-              className="scenePhoto sceneFrame"
+              className={`scenePhoto sceneFrame${isHoveringFairyZone ? " videoHintPaused" : ""}`}
               style={{ transform: "translateY(20px) scale(1.02)" }}
-              onPointerMove={spawnFairyParticles}
-              onPointerEnter={spawnFairyParticles}
+              onPointerMove={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const targetX = rect.width * 0.7;
+                const targetY = rect.height * 0.5;
+                const withinX =
+                  x >= targetX - rect.width * 0.3 && x <= targetX + rect.width * 0.22;
+                const withinY = Math.abs(y - targetY) <= rect.height * 0.15;
+                setIsHoveringFairyZone(withinX && withinY);
+                spawnFairyParticles(event);
+              }}
+              onPointerEnter={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const targetX = rect.width * 0.7;
+                const targetY = rect.height * 0.5;
+                const withinX =
+                  x >= targetX - rect.width * 0.3 && x <= targetX + rect.width * 0.22;
+                const withinY = Math.abs(y - targetY) <= rect.height * 0.15;
+                setIsHoveringFairyZone(withinX && withinY);
+                spawnFairyParticles(event);
+              }}
+              onPointerLeave={() => setIsHoveringFairyZone(false)}
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+              <span className="videoMagicHint videoMagicHintCircusScene5Fairy" aria-hidden="true" />
               <div
                 className="sceneCornerBox sceneCornerTopRight"
                 style={{ width: "300px", minHeight: "140px" }}

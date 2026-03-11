@@ -27,6 +27,7 @@ export default function Section9Overlay() {
   const [goldParticles, setGoldParticles] = useState<
     { id: number; x: number; y: number; size: number; duration: number; delay: number }[]
   >([]);
+  const [isHoveringScene2GoldZone, setIsHoveringScene2GoldZone] = useState(false);
   const [scene3Particles, setScene3Particles] = useState<
     {
       id: number;
@@ -374,12 +375,36 @@ export default function Section9Overlay() {
           <div
             key={image.src}
             ref={scene2FrameRef}
-            className="scenePhoto sceneFrame"
+            className={`scenePhoto sceneFrame${
+              isHoveringScene2GoldZone || goldParticles.length > 0 ? " videoHintPaused" : ""
+            }`}
             style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}
-            onPointerMove={spawnScene2GoldParticles}
-            onPointerEnter={spawnScene2GoldParticles}
+            onPointerMove={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect();
+              const x = event.clientX - rect.left;
+              const y = event.clientY - rect.top;
+              const targetX = rect.width * 0.5 - 165;
+              const targetY = rect.height * 0.52;
+              const withinX = x >= targetX - rect.width * 0.16 && x <= targetX + rect.width * 0.12;
+              const withinY = Math.abs(y - targetY) <= rect.height * 0.15;
+              setIsHoveringScene2GoldZone(withinX && withinY);
+              spawnScene2GoldParticles(event);
+            }}
+            onPointerEnter={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect();
+              const x = event.clientX - rect.left;
+              const y = event.clientY - rect.top;
+              const targetX = rect.width * 0.5 - 165;
+              const targetY = rect.height * 0.52;
+              const withinX = x >= targetX - rect.width * 0.16 && x <= targetX + rect.width * 0.12;
+              const withinY = Math.abs(y - targetY) <= rect.height * 0.15;
+              setIsHoveringScene2GoldZone(withinX && withinY);
+              spawnScene2GoldParticles(event);
+            }}
+            onPointerLeave={() => setIsHoveringScene2GoldZone(false)}
           >
             <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+            <span className="videoMagicHint videoMagicHintSection9Scene2Gold" aria-hidden="true" />
             <audio ref={baritaAudioRef} src="/Sonidos/Barita.mp3" preload="auto" />
             {goldParticles.map((piece) => (
               <div

@@ -30,34 +30,14 @@ export default function ScrollNose() {
     };
   }, []);
 
-  const requestSceneStep = (direction: -1 | 1) => {
-    window.dispatchEvent(new CustomEvent("scene-step-request", { detail: { direction } }));
-  };
-
   return (
-    <div className="scrollNose">
-      <button
-        type="button"
-        className="scrollNoseArrow scrollNoseArrowPrev"
-        aria-label="Escena anterior"
-        onClick={() => requestSceneStep(-1)}
-      >
-        ‹
-      </button>
+    <div className="scrollNose" aria-hidden="true">
       <div className="pinochoFace">
         <img src="/pinochomini.svg" alt="Pinocho" />
       </div>
       <div className="noseTrack">
         <div className="noseFill" />
       </div>
-      <button
-        type="button"
-        className="scrollNoseArrow scrollNoseArrowNext"
-        aria-label="Escena siguiente"
-        onClick={() => requestSceneStep(1)}
-      >
-        ›
-      </button>
     </div>
   );
 }

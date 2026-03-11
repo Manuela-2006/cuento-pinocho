@@ -223,23 +223,9 @@ export default function MapScrollCamera() {
         });
       };
 
-      const onSceneStepRequest = (event: Event) => {
-        const detail = (event as CustomEvent<{ direction?: number }>).detail;
-        const rawDirection = detail?.direction;
-        if (rawDirection !== 1 && rawDirection !== -1) return;
-        stepSceneByDirection(rawDirection, {
-          respectDwell: false,
-          respectWheelLock: false,
-          preventEvent: null,
-          allowLeaveAtEdges: true,
-        });
-      };
-
       window.addEventListener("wheel", onWheelStepByScene, { passive: false, capture: true });
-      window.addEventListener("scene-step-request", onSceneStepRequest as EventListener);
       removeWheelLock = () => {
         window.removeEventListener("wheel", onWheelStepByScene, { capture: true });
-        window.removeEventListener("scene-step-request", onSceneStepRequest as EventListener);
       };
 
       const setIslandMode = (active: boolean) => {

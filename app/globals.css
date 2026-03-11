@@ -1275,6 +1275,21 @@ button[aria-label*="Pepito Grillo"]::after,
   top: 80%;
 }
 
+.pepitoMagicHintVillageScene4 {
+  left: 78.5%;
+  top: 46.5%;
+}
+
+.pepitoMagicHintSection8Scene1 {
+  left: 84%;
+  top: 45%;
+}
+
+.pepitoMagicHintSection8Scene3 {
+  left: 50%;
+  top: 50%;
+}
+
 button[aria-label*="Pepito Grillo"]:hover::before,
 button[aria-label*="Pepito Grillo"]:hover::after,
 .pepitoHintPaused .pepitoMagicHint::before,

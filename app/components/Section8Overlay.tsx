@@ -482,13 +482,14 @@ export default function Section8Overlay() {
         image.src === "/seccion8/Escena1.jpg" ? (
           <div
             key={image.src}
-            className="scenePhoto sceneFrame"
+            className={`scenePhoto sceneFrame${showScene1Tooltip ? " pepitoHintPaused" : ""}`}
             style={{
               transform: "translateY(20px) scale(1.02)",
               display: showSection8Images ? "block" : "none",
             }}
           >
             <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+            <span className="pepitoMagicHint pepitoMagicHintSection8Scene1" aria-hidden="true" />
 
             <div className="section8WaterLayer" aria-hidden="true">
               {SCENE1_WATER_PARTICLES.map((particle) => (
@@ -567,7 +568,7 @@ export default function Section8Overlay() {
         ) : image.src === "/seccion8/Escena3.jpg" ? (
           <div
             key={image.src}
-            className="scenePhoto sceneFrame"
+            className={`scenePhoto sceneFrame${showScene3Tooltip ? " pepitoHintPaused" : ""}`}
             style={{
               transform: "translateY(20px) scale(1.02)",
               width: "var(--scene-max-width)",
@@ -578,6 +579,7 @@ export default function Section8Overlay() {
             }}
           >
             <img className="sceneFrameImage section8BoatDriftImage" src={image.src} alt={image.alt} />
+            <span className="pepitoMagicHint pepitoMagicHintSection8Scene3" aria-hidden="true" />
             <button
               type="button"
               aria-label="Tooltip Pinocho Escena 3"

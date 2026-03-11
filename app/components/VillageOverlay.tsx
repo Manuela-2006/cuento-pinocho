@@ -369,6 +369,7 @@ export default function VillageOverlay() {
                 }}
               >
                 <InlineSvg src={image.src} className="sceneSvgInner" />
+                <span className="pepitoMagicHint pepitoMagicHintVillageScene4" aria-hidden="true" />
                 
                 {(image as any).text && (
                   <div 

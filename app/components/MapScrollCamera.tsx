@@ -102,6 +102,20 @@ export default function MapScrollCamera() {
       let wheelStepLockUntil = 0;
       let currentSceneKey = "";
       let currentSceneEnteredAt = 0;
+      let pendingSceneStepDirection = 0;
+      let pendingSceneStepExpiresAt = 0;
+      const sceneStepIntentWindowMs = 900;
+
+      const consumeSceneStepIntent = (currentIndex: number, nextIndex: number) => {
+        if (nextIndex === currentIndex) return true;
+        const now = Date.now();
+        if (now > pendingSceneStepExpiresAt) return false;
+        const intendedDirection = nextIndex > currentIndex ? 1 : -1;
+        if (intendedDirection !== pendingSceneStepDirection) return false;
+        pendingSceneStepDirection = 0;
+        pendingSceneStepExpiresAt = 0;
+        return true;
+      };
 
       const getActiveSequenceConfig = () => {
         const currentY = window.scrollY;
@@ -123,18 +137,20 @@ export default function MapScrollCamera() {
         return active[0];
       };
 
-      const onWheelStepByScene = (event: WheelEvent) => {
-        if (event.ctrlKey) return;
-        if (Math.abs(event.deltaY) < 1) return;
-
+      const stepSceneByDirection = (
+        direction: 1 | -1,
+        options?: {
+          respectDwell?: boolean;
+          respectWheelLock?: boolean;
+          preventEvent?: WheelEvent | null;
+        }
+      ) => {
         const activeConfig = getActiveSequenceConfig();
-        if (!activeConfig) return;
+        if (!activeConfig) return false;
 
         const steps = Math.max(1, activeConfig.steps);
-        // Si no hay secuencia real (1 sola escena), no bloquear scroll nativo.
-        if (steps <= 1) return;
+        if (steps <= 1) return false;
 
-        const direction = event.deltaY > 0 ? 1 : -1;
         const start = Number(activeConfig.trigger.start);
         const end = Number(activeConfig.trigger.end);
         const currentProgress = Math.min(0.9999, Math.max(0, activeConfig.trigger.progress));
@@ -146,33 +162,34 @@ export default function MapScrollCamera() {
           currentSceneKey = sceneKey;
           currentSceneEnteredAt = now;
         }
+
+        const event = options?.preventEvent ?? null;
+        const blockNative = () => {
+          if (!event) return;
+          event.preventDefault();
+          event.stopPropagation();
+          (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+        };
+
         const dwellElapsed = now - currentSceneEnteredAt;
+        if ((options?.respectDwell ?? false) && dwellElapsed < minSceneDwellMs) {
+          blockNative();
+          return true;
+        }
+
         const isTryingToLeaveAtStart = currentIndex === 0 && direction < 0;
         const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
+        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) return false;
 
-        // Exigir permanencia mínima por escena antes de cambiar de escena o salir del tramo.
-        if (dwellElapsed < minSceneDwellMs) {
-          event.preventDefault();
-          event.stopPropagation();
-          (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
-          return;
+        if ((options?.respectWheelLock ?? false) && now < wheelStepLockUntil) {
+          blockNative();
+          return true;
         }
 
-        // En bordes, permitir scroll nativo para salir del tramo una vez cumplido el tiempo mínimo.
-        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) return;
-
-        // Un único cambio de escena por gesto/ráfaga de rueda.
-        if (now < wheelStepLockUntil) {
-          event.preventDefault();
-          event.stopPropagation();
-          (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
-          return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-        (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+        blockNative();
         wheelStepLockUntil = now + wheelStepLockMs;
+        pendingSceneStepDirection = direction;
+        pendingSceneStepExpiresAt = now + sceneStepIntentWindowMs;
 
         const range = Math.max(1, end - start);
         const targetIndex = Math.min(steps - 1, Math.max(0, currentIndex + direction));
@@ -183,11 +200,36 @@ export default function MapScrollCamera() {
 
         window.scrollTo({ top: target, behavior: "smooth" });
         ScrollTrigger.update();
+        return true;
+      };
+
+      const onWheelStepByScene = (event: WheelEvent) => {
+        if (event.ctrlKey) return;
+        if (Math.abs(event.deltaY) < 1) return;
+        const direction = event.deltaY > 0 ? 1 : -1;
+        stepSceneByDirection(direction, {
+          respectDwell: true,
+          respectWheelLock: true,
+          preventEvent: event,
+        });
+      };
+
+      const onSceneStepRequest = (event: Event) => {
+        const detail = (event as CustomEvent<{ direction?: number }>).detail;
+        const rawDirection = detail?.direction;
+        if (rawDirection !== 1 && rawDirection !== -1) return;
+        stepSceneByDirection(rawDirection, {
+          respectDwell: false,
+          respectWheelLock: false,
+          preventEvent: null,
+        });
       };
 
       window.addEventListener("wheel", onWheelStepByScene, { passive: false, capture: true });
+      window.addEventListener("scene-step-request", onSceneStepRequest as EventListener);
       removeWheelLock = () => {
         window.removeEventListener("wheel", onWheelStepByScene, { capture: true });
+        window.removeEventListener("scene-step-request", onSceneStepRequest as EventListener);
       };
 
       const setIslandMode = (active: boolean) => {
@@ -470,6 +512,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== activeIndex) {
+              if (!consumeSceneStepIntent(activeIndex, nextIndex)) return;
               gsap.to(photos[activeIndex], { autoAlpha: 0, duration: 0.3 });
               gsap.to(photos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               photos[activeIndex]?.classList.remove("is-active");
@@ -555,6 +598,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== villageIndex) {
+              if (!consumeSceneStepIntent(villageIndex, nextIndex)) return;
               gsap.to(villagePhotos[villageIndex], { autoAlpha: 0, duration: 0.3 });
               gsap.to(villagePhotos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               villagePhotos[villageIndex]?.classList.remove("is-active");
@@ -694,6 +738,7 @@ export default function MapScrollCamera() {
               nextIndex = 0;
             }
 
+            if (nextIndex !== circusIndex && !consumeSceneStepIntent(circusIndex, nextIndex)) return;
             setCircusPhotoByIndex(nextIndex);
           },
           onRefresh: (self) => {
@@ -803,6 +848,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== forestIndex) {
+              if (!consumeSceneStepIntent(forestIndex, nextIndex)) return;
               gsap.to(forestPhotos[forestIndex], { autoAlpha: 0, duration: 0.3 });
               gsap.to(forestPhotos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               forestPhotos[forestIndex]?.classList.remove("is-active");
@@ -931,6 +977,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== islandIndex) {
+              if (!consumeSceneStepIntent(islandIndex, nextIndex)) return;
               gsap.to(islandPhotos[islandIndex], { autoAlpha: 0, duration: 0.3 });
               gsap.to(islandPhotos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               islandPhotos[islandIndex]?.classList.remove("is-active");
@@ -1075,6 +1122,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== section7Index) {
+              if (!consumeSceneStepIntent(section7Index, nextIndex)) return;
               gsap.to(section7Photos[section7Index], { autoAlpha: 0, duration: 0.3 });
               gsap.to(section7Photos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               section7Photos[section7Index]?.classList.remove("is-active");
@@ -1231,6 +1279,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== section8Index) {
+              if (!consumeSceneStepIntent(section8Index, nextIndex)) return;
               gsap.to(section8Photos[section8Index], { autoAlpha: 0, duration: 0.3 });
               gsap.to(section8Photos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               section8Photos[section8Index]?.classList.remove("is-active");
@@ -1389,6 +1438,7 @@ export default function MapScrollCamera() {
             );
 
             if (nextIndex !== section9Index) {
+              if (!consumeSceneStepIntent(section9Index, nextIndex)) return;
               gsap.to(section9Photos[section9Index], { autoAlpha: 0, duration: 0.3 });
               gsap.to(section9Photos[nextIndex], { autoAlpha: 1, duration: 0.3 });
               section9Photos[section9Index]?.classList.remove("is-active");

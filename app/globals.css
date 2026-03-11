@@ -1579,6 +1579,47 @@ button[aria-label*="Pepito Grillo"]:hover::after,
   --nose-join: 0px;
 }
 
+.scrollNoseArrow {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(84, 43, 19, 0.28);
+  background: rgba(255, 243, 224, 0.92);
+  color: #6f3d1c;
+  font-size: 1.8rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(63, 31, 12, 0.14);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.scrollNoseArrow:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 249, 236, 0.98);
+  box-shadow: 0 8px 18px rgba(63, 31, 12, 0.2);
+}
+
+.scrollNoseArrow:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(63, 31, 12, 0.16);
+}
+
+.scrollNoseArrow:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.65);
+  outline-offset: 2px;
+}
+
+.scrollNoseArrowPrev {
+  margin-right: 8px;
+}
+
+.scrollNoseArrowNext {
+  margin-left: 12px;
+}
+
 .pinochoFace {
   position: relative;
   width: 128px;

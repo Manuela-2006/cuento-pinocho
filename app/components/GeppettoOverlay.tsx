@@ -439,6 +439,7 @@ export default function GeppettoOverlay() {
       x <= grilloX + grilloSize / 2 &&
       y >= grilloY - grilloSize / 2 &&
       y <= grilloY + grilloSize / 2;
+    event.currentTarget.classList.toggle("pepitoHintPaused", isOverGrillo);
     event.currentTarget.style.cursor = isOverGrillo ? "pointer" : "default";
     if (isOverGrillo) {
       const tooltipWidth = grilloTooltipRef.current?.offsetWidth ?? 320;
@@ -701,12 +702,14 @@ export default function GeppettoOverlay() {
                   className="scenePhoto sceneFrame"
                   onMouseMove={handleMouseMoveGrillo}
                   onMouseLeave={(event) => {
+                    event.currentTarget.classList.remove("pepitoHintPaused");
                     event.currentTarget.style.cursor = "default";
                     setGrilloTooltipData((prev) => ({ ...prev, show: false }));
                   }}
                   style={{ transform: "translateY(15px) scale(1.02)" }}
                 >
                   <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+                  <span className="pepitoMagicHint pepitoMagicHintGeppetto" aria-hidden="true" />
                   <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
                     {(image as any).text}
                   </div>

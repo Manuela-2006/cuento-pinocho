@@ -431,6 +431,7 @@ export default function CircusOverlay() {
                   x <= rect.width * 0.62 &&
                   y >= rect.height * 0.7 &&
                   y <= rect.height * 0.9;
+                event.currentTarget.classList.toggle("pepitoHintPaused", isOverGrillo);
                 event.currentTarget.style.cursor = isOverGrillo ? "pointer" : "default";
 
                 if (isOverGrillo) {
@@ -446,11 +447,13 @@ export default function CircusOverlay() {
                 }
               }}
               onPointerLeave={(event) => {
+                event.currentTarget.classList.remove("pepitoHintPaused");
                 event.currentTarget.style.cursor = "default";
                 setGrilloTooltipData((prev) => ({ ...prev, show: false }));
               }}
             >
               <img className="sceneFrameImage" src={image.src} alt={image.alt} />
+              <span className="pepitoMagicHint pepitoMagicHintCircusScene4" aria-hidden="true" />
               <div
                 className="sceneCornerBox sceneCornerTopRight"
                 style={{ width: "300px", minHeight: "140px", padding: "0.3rem 0.7rem" }}

@@ -1070,17 +1070,21 @@ body.section9-active .section9Overlay .scenePhoto {
   top: -35px;      /* Más arriba */
 }
 
-/* Pepito: brillo mágico sutil (1s visible cada 45s) */
+/* Pepito: brillo magico sutil (1s visible / 1s oculto) */
 @keyframes pepitoMagicAura {
   0% {
     opacity: 0;
     transform: scale(0.85);
   }
-  0.4% {
-    opacity: 0.45;
+  10% {
+    opacity: 0.48;
     transform: scale(1);
   }
-  2.2% {
+  40% {
+    opacity: 0.2;
+    transform: scale(1.08);
+  }
+  50% {
     opacity: 0;
     transform: scale(1.18);
   }
@@ -1095,11 +1099,15 @@ body.section9-active .section9Overlay .scenePhoto {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.7) rotate(0deg);
   }
-  0.5% {
+  12% {
     opacity: 0.9;
     transform: translate(-50%, -50%) scale(1) rotate(12deg);
   }
-  2.2% {
+  45% {
+    opacity: 0.25;
+    transform: translate(-50%, -50%) scale(1.08) rotate(24deg);
+  }
+  50% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(1.18) rotate(30deg);
   }
@@ -1114,21 +1122,24 @@ body.section9-active .section9Overlay .scenePhoto {
   100% {
     filter: none;
   }
-  0.4% {
+  10% {
     filter: drop-shadow(0 0 5px rgba(173, 234, 255, 0.75))
       drop-shadow(0 0 10px rgba(255, 248, 186, 0.7));
   }
-  2.2% {
+  50% {
     filter: none;
   }
 }
 
-button[aria-label*="Pepito Grillo"] {
+button[aria-label*="Pepito Grillo"],
+.pepitoMagicHint {
   isolation: isolate;
 }
 
 button[aria-label*="Pepito Grillo"]::before,
-button[aria-label*="Pepito Grillo"]::after {
+button[aria-label*="Pepito Grillo"]::after,
+.pepitoMagicHint::before,
+.pepitoMagicHint::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -1141,7 +1152,8 @@ button[aria-label*="Pepito Grillo"]::after {
   animation-iteration-count: infinite;
 }
 
-button[aria-label*="Pepito Grillo"]::before {
+button[aria-label*="Pepito Grillo"]::before,
+.pepitoMagicHint::before {
   width: clamp(42px, 5vw, 70px);
   height: clamp(42px, 5vw, 70px);
   border-radius: 999px;
@@ -1156,7 +1168,8 @@ button[aria-label*="Pepito Grillo"]::before {
   animation-name: pepitoMagicAura;
 }
 
-button[aria-label*="Pepito Grillo"]::after {
+button[aria-label*="Pepito Grillo"]::after,
+.pepitoMagicHint::after {
   width: clamp(78px, 8vw, 120px);
   height: clamp(78px, 8vw, 120px);
   border-radius: 999px;
@@ -1169,11 +1182,43 @@ button[aria-label*="Pepito Grillo"]::after {
   animation-name: pepitoMagicDust;
 }
 
-.villageOverlay svg #Grillo1,
-.villageOverlay svg [data-name="Grillo1"] {
-  animation: pepitoSvgGlow 45s linear infinite;
+.pepitoMagicHint {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9;
 }
 
+.pepitoMagicHintGeppetto {
+  left: 82%;
+  top: 28%;
+}
+
+.pepitoMagicHintCircusScene4 {
+  left: 55%;
+  top: 80%;
+}
+
+button[aria-label*="Pepito Grillo"]:hover::before,
+button[aria-label*="Pepito Grillo"]:hover::after,
+.pepitoHintPaused .pepitoMagicHint::before,
+.pepitoHintPaused .pepitoMagicHint::after {
+  animation-play-state: paused;
+  opacity: 0 !important;
+}
+
+.villageOverlay svg #Grillo1,
+.villageOverlay svg [data-name="Grillo1"] {
+  animation: pepitoSvgGlow 2s linear infinite;
+}
+
+.villageHover.pepitoHintPaused svg #Grillo1,
+.villageHover.pepitoHintPaused svg [data-name="Grillo1"] {
+  animation-play-state: paused;
+  filter: none !important;
+}
 /* Habilitar hover para áreas interactivas en Escena4.svg (Village) */
 .villageOverlay svg #Grillo1,
 .villageOverlay svg [data-name="Grillo1"],
@@ -1788,5 +1833,6 @@ body.intro-lock .scrollNose {
     left: clamp(260px, 22vw, 460px) !important;
   }
 }
+
 
 

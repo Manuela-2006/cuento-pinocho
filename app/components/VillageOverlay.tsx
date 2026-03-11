@@ -72,6 +72,8 @@ export default function VillageOverlay() {
 
   const handlePointerMoveGrillo = (event: React.PointerEvent<HTMLDivElement>) => {
     if (isHoveringMusic) {
+      event.currentTarget.classList.remove("pepitoHintPaused");
+      event.currentTarget.style.cursor = "default";
       setGrilloTooltipData({ show: false, x: 0, y: 0 });
       return;
     }
@@ -92,6 +94,7 @@ export default function VillageOverlay() {
       event.clientX <= box.right &&
       event.clientY >= box.top &&
       event.clientY <= box.bottom;
+    event.currentTarget.classList.toggle("pepitoHintPaused", isOverGrillo);
     event.currentTarget.style.cursor = isOverGrillo ? "pointer" : "default";
 
     if (isOverGrillo) {
@@ -353,6 +356,7 @@ export default function VillageOverlay() {
                   }
                 }}
                 onPointerLeave={(event) => {
+                  event.currentTarget.classList.remove("pepitoHintPaused");
                   event.currentTarget.style.cursor = "default";
                   setIsHoveringMusic(false);
                   setGrilloTooltipData({ show: false, x: 0, y: 0 });

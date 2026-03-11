@@ -1868,6 +1868,11 @@ body.intro-lock .scrollNose {
     --scene-text-pad-y: 0.95rem;
     --scene-text-pad-x: 0.95rem;
   }
+
+  .grilloTooltipIslandScene8 {
+    left: calc(97% - clamp(18px, 3.6vw, 64px)) !important;
+    top: calc(57% - clamp(0px, 0.6vw, 10px)) !important;
+  }
 }
 
 @media (min-width: 1900px) {

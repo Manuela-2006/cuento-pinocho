@@ -98,7 +98,7 @@ export default function MapScrollCamera() {
 
       const sequenceStepConfigs: Array<{ trigger: ScrollTrigger; steps: number }> = [];
       const wheelStepLockMs = 420;
-      const minSceneDwellMs = 1500;
+      const minSceneDwellMs = 2000;
       let wheelStepLockUntil = 0;
       let currentSceneKey = "";
       let currentSceneEnteredAt = 0;

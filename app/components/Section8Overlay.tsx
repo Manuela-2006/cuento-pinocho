@@ -69,13 +69,59 @@ const SCENE6_LIGHTNING_BRANCHES = [
   { top: 56, height: 16, x: 10, angle: 32 },
 ];
 
+type Area = { left: number; top: number; width: number; height: number };
+
 function Section8Scene2({ showSection8Images }: { showSection8Images: boolean }) {
   const svgContainerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const isVideoActiveRef = useRef(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [ballenaArea, setBallenaArea] = useState<Area>({ left: 58.5, top: 22, width: 23, height: 35 });
   const BALLENA_SELECTOR = "#Ballena1, [data-name='Ballena1']";
   const effectsEnabled = () => document.body.dataset.effectsEnabled !== "false";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadBallenaAreaFromSvg = async () => {
+      try {
+        const text = await fetch("/seccion8/Escena2.svg").then((r) => r.text());
+        if (cancelled) return;
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "image/svg+xml");
+        const svg = doc.querySelector("svg");
+        const ballena = doc.querySelector<SVGRectElement>("#Ballena1");
+        if (!svg || !ballena) return;
+
+        const viewBox = svg.getAttribute("viewBox") || "";
+        const vbParts = viewBox.split(/\s+/).map(Number);
+        const vbW = vbParts.length === 4 ? vbParts[2] : Number(svg.getAttribute("width") || 1408);
+        const vbH = vbParts.length === 4 ? vbParts[3] : Number(svg.getAttribute("height") || 736);
+
+        const x = Number(ballena.getAttribute("x") || 0);
+        const y = Number(ballena.getAttribute("y") || 0);
+        const w = Number(ballena.getAttribute("width") || 0);
+        const h = Number(ballena.getAttribute("height") || 0);
+
+        if (vbW > 0 && vbH > 0 && w > 0 && h > 0) {
+          setBallenaArea({
+            left: (x / vbW) * 100,
+            top: (y / vbH) * 100,
+            width: (w / vbW) * 100,
+            height: (h / vbH) * 100,
+          });
+        }
+      } catch {
+        // fallback defaults
+      }
+    };
+
+    void loadBallenaAreaFromSvg();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const playVideo = () => {
     if (isVideoActiveRef.current) return;
@@ -122,7 +168,7 @@ function Section8Scene2({ showSection8Images }: { showSection8Images: boolean })
   return (
     <div
       ref={svgContainerRef}
-      className="scenePhoto sceneFrame"
+      className={`scenePhoto sceneFrame${showVideo ? " videoHintPaused" : ""}`}
       style={{
         transform: "translateY(20px) scale(1.02)",
         display: showSection8Images ? "block" : "none",
@@ -136,6 +182,14 @@ function Section8Scene2({ showSection8Images }: { showSection8Images: boolean })
       onPointerLeave={stopVideo}
     >
       <InlineSvg src="/seccion8/Escena2.svg" className="sceneSvgInner" />
+      <span
+        className="videoMagicHint"
+        aria-hidden="true"
+        style={{
+          left: `${ballenaArea.left + ballenaArea.width / 2}%`,
+          top: `${ballenaArea.top + ballenaArea.height / 2}%`,
+        }}
+      />
       <video
         ref={videoRef}
         className={`section7BallenaVideo ${showVideo ? "is-visible" : ""}`}

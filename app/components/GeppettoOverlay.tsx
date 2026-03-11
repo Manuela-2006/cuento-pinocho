@@ -107,7 +107,9 @@ export default function GeppettoOverlay() {
     x: number;
     y: number;
   }>({ show: false, x: 0, y: 0 });
+  const [videoHintPos, setVideoHintPos] = useState<{ left: number; top: number }>({ left: 50, top: 50 });
   const grilloTooltipRef = useRef<HTMLDivElement | null>(null);
+  const videoSceneRef = useRef<HTMLDivElement | null>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [flames, setFlames] = useState<Flame[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -521,6 +523,34 @@ export default function GeppettoOverlay() {
     const closest = targetEl?.closest?.(RECT_SELECTOR);
     return !!closest;
   };
+
+  useEffect(() => {
+    const container = videoSceneRef.current;
+    if (!container) return;
+
+    const updateHintPosition = () => {
+      const svgEl = container.querySelector("svg");
+      const pinochoEl = svgEl?.querySelector(RECT_SELECTOR) as Element | null;
+      if (!svgEl || !pinochoEl) return;
+
+      const containerBox = container.getBoundingClientRect();
+      const pinochoBox = pinochoEl.getBoundingClientRect();
+      if (containerBox.width <= 0 || containerBox.height <= 0) return;
+
+      const left = ((pinochoBox.left + pinochoBox.width / 2 - containerBox.left) / containerBox.width) * 100;
+      const top = ((pinochoBox.top + pinochoBox.height / 2 - containerBox.top) / containerBox.height) * 100;
+      setVideoHintPos({ left, top });
+    };
+
+    updateHintPosition();
+    const interval = window.setInterval(updateHintPosition, 300);
+    window.addEventListener("resize", updateHintPosition);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("resize", updateHintPosition);
+    };
+  }, []);
+
   return (
     <>
       {/* ✅ IMPORTANTE: añadimos is-active para que el overlay reciba clicks */}
@@ -579,8 +609,11 @@ export default function GeppettoOverlay() {
             return (
               <div
                 key={image.src}
+                ref={isVideo ? videoSceneRef : undefined}
                 className={`scenePhoto sceneSvg${isVideo ? " is-video" : ""}${
                   isOpen ? " is-playing" : ""
+                }${isOpen ? " videoHintPaused" : ""}${
+                  isVideo && showAfterVideo ? " videoHintPaused" : ""
                 }${isFading ? " is-fading" : ""}${
                   image.src === "/seccion2/Escena1.svg" ? " is-hada-wand" : ""
                 }`}
@@ -602,6 +635,13 @@ export default function GeppettoOverlay() {
                 
               >
                 <InlineSvg src={image.src} className="sceneSvgInner" />
+                {isVideo && (
+                  <span
+                    className="videoMagicHint"
+                    aria-hidden="true"
+                    style={{ left: `${videoHintPos.left}%`, top: `${videoHintPos.top}%` }}
+                  />
+                )}
                 {(image as any).text && !showAfterVideo && (
                   <div className={`sceneCornerBox ${getTextPositionClass((image as any).textPosition)}`}>
                     {(image as any).text}

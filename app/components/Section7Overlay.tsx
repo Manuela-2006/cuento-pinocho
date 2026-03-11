@@ -159,12 +159,20 @@ function Section7Scene2() {
 
   return (
     <div
-      className="scenePhoto sceneFrame section7DustScene"
+      className={`scenePhoto sceneFrame section7DustScene${showVideo ? " videoHintPaused" : ""}`}
       style={{ transform: "translateY(20px) scale(1.02)", overflow: "hidden" }}
       onPointerMove={handlePointerMove}
       onPointerLeave={stopVideo}
     >
       <img className="sceneFrameImage" src="/seccion7/Escena2.svg" alt="Escena 2" />
+      <span
+        className="videoMagicHint"
+        aria-hidden="true"
+        style={{
+          left: `${ballenaArea.left + ballenaArea.width / 2}%`,
+          top: `${ballenaArea.top + ballenaArea.height / 2}%`,
+        }}
+      />
 
       <video
         ref={videoRef}

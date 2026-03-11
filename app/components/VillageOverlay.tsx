@@ -316,7 +316,7 @@ export default function VillageOverlay() {
               <div
                 key={image.src}
                 ref={svgContainerRef}
-                className={`scenePhoto sceneSvg villageHover${isHoveringMusic ? " is-playing" : ""}`}
+                className={`scenePhoto sceneSvg villageHover${isHoveringMusic ? " is-playing videoHintPaused" : ""}`}
                 onPointerMove={(event) => {
                   handlePointerMoveGrillo(event);
 
@@ -370,6 +370,7 @@ export default function VillageOverlay() {
               >
                 <InlineSvg src={image.src} className="sceneSvgInner" />
                 <span className="pepitoMagicHint pepitoMagicHintVillageScene4" aria-hidden="true" />
+                <span className="videoMagicHint videoMagicHintVillageMusic" aria-hidden="true" />
                 
                 {(image as any).text && (
                   <div 

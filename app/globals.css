@@ -1133,6 +1133,7 @@ body.section9-active .section9Overlay .scenePhoto {
 
 button[aria-label*="Pepito Grillo"],
 .pepitoMagicHint,
+.videoMagicHint,
 .grilloTooltipPepitoSparkles {
   isolation: isolate;
 }
@@ -1141,6 +1142,8 @@ button[aria-label*="Pepito Grillo"]::before,
 button[aria-label*="Pepito Grillo"]::after,
 .pepitoMagicHint::before,
 .pepitoMagicHint::after,
+.videoMagicHint::before,
+.videoMagicHint::after,
 .grilloTooltipPepitoSparkles::before,
 .grilloTooltipPepitoSparkles::after {
   content: "";
@@ -1157,6 +1160,7 @@ button[aria-label*="Pepito Grillo"]::after,
 
 button[aria-label*="Pepito Grillo"]::before,
 .pepitoMagicHint::before,
+.videoMagicHint::before,
 .grilloTooltipPepitoSparkles::before {
   width: clamp(42px, 5vw, 70px);
   height: clamp(42px, 5vw, 70px);
@@ -1174,6 +1178,7 @@ button[aria-label*="Pepito Grillo"]::before,
 
 button[aria-label*="Pepito Grillo"]::after,
 .pepitoMagicHint::after,
+.videoMagicHint::after,
 .grilloTooltipPepitoSparkles::after {
   width: clamp(78px, 8vw, 120px);
   height: clamp(78px, 8vw, 120px);
@@ -1188,6 +1193,15 @@ button[aria-label*="Pepito Grillo"]::after,
 }
 
 .pepitoMagicHint {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9;
+}
+
+.videoMagicHint {
   position: absolute;
   width: 120px;
   height: 120px;
@@ -1290,10 +1304,21 @@ button[aria-label*="Pepito Grillo"]::after,
   top: 50%;
 }
 
+.videoMagicHintVillageMusic {
+  left: 34.2%;
+  top: 46.1%;
+}
+
 button[aria-label*="Pepito Grillo"]:hover::before,
 button[aria-label*="Pepito Grillo"]:hover::after,
 .pepitoHintPaused .pepitoMagicHint::before,
 .pepitoHintPaused .pepitoMagicHint::after {
+  animation-play-state: paused;
+  opacity: 0 !important;
+}
+
+.videoHintPaused .videoMagicHint::before,
+.videoHintPaused .videoMagicHint::after {
   animation-play-state: paused;
   opacity: 0 !important;
 }

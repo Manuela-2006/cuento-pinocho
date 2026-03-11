@@ -143,6 +143,7 @@ export default function MapScrollCamera() {
           respectDwell?: boolean;
           respectWheelLock?: boolean;
           preventEvent?: WheelEvent | null;
+          allowLeaveAtEdges?: boolean;
         }
       ) => {
         const activeConfig = getActiveSequenceConfig();
@@ -179,7 +180,13 @@ export default function MapScrollCamera() {
 
         const isTryingToLeaveAtStart = currentIndex === 0 && direction < 0;
         const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
-        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) return false;
+        if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) {
+          if (!(options?.allowLeaveAtEdges ?? false)) return false;
+          const edgeTarget = direction > 0 ? end + 2 : start - 2;
+          window.scrollTo({ top: Math.max(0, edgeTarget), behavior: "smooth" });
+          ScrollTrigger.update();
+          return true;
+        }
 
         if ((options?.respectWheelLock ?? false) && now < wheelStepLockUntil) {
           blockNative();
@@ -211,6 +218,7 @@ export default function MapScrollCamera() {
           respectDwell: true,
           respectWheelLock: true,
           preventEvent: event,
+          allowLeaveAtEdges: true,
         });
       };
 
@@ -222,6 +230,7 @@ export default function MapScrollCamera() {
           respectDwell: false,
           respectWheelLock: false,
           preventEvent: null,
+          allowLeaveAtEdges: true,
         });
       };
 

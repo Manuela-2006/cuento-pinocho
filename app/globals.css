@@ -1342,6 +1342,12 @@ button[aria-label="Pepito Grillo Escena 5"]::after {
   left: 32%;
 }
 
+button[aria-label="Pepito Grillo Escena 8"]::before,
+button[aria-label="Pepito Grillo Escena 8"]::after {
+  left: 18%;
+  top: 18%;
+}
+
 .videoHintPaused .videoMagicHint::before,
 .videoHintPaused .videoMagicHint::after {
   animation-play-state: paused;

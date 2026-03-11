@@ -98,7 +98,10 @@ export default function MapScrollCamera() {
 
       const sequenceStepConfigs: Array<{ trigger: ScrollTrigger; steps: number }> = [];
       const wheelStepLockMs = 420;
+      const minSceneDwellMs = 4000;
       let wheelStepLockUntil = 0;
+      let currentSceneKey = "";
+      let currentSceneEnteredAt = 0;
 
       const getActiveSequenceConfig = () => {
         const currentY = window.scrollY;
@@ -136,13 +139,28 @@ export default function MapScrollCamera() {
         const end = Number(activeConfig.trigger.end);
         const currentProgress = Math.min(0.9999, Math.max(0, activeConfig.trigger.progress));
         const currentIndex = Math.min(steps - 1, Math.floor(currentProgress * steps));
+        const sequenceKey = `${start}:${end}:${steps}`;
+        const sceneKey = `${sequenceKey}:${currentIndex}`;
+        const now = Date.now();
+        if (sceneKey !== currentSceneKey) {
+          currentSceneKey = sceneKey;
+          currentSceneEnteredAt = now;
+        }
+        const dwellElapsed = now - currentSceneEnteredAt;
         const isTryingToLeaveAtStart = currentIndex === 0 && direction < 0;
         const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
 
-        // En bordes, permitir scroll nativo para salir del tramo sin bloqueos.
+        // Exigir permanencia mínima por escena antes de cambiar de escena o salir del tramo.
+        if (dwellElapsed < minSceneDwellMs) {
+          event.preventDefault();
+          event.stopPropagation();
+          (event as WheelEvent & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.();
+          return;
+        }
+
+        // En bordes, permitir scroll nativo para salir del tramo una vez cumplido el tiempo mínimo.
         if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) return;
 
-        const now = Date.now();
         // Un único cambio de escena por gesto/ráfaga de rueda.
         if (now < wheelStepLockUntil) {
           event.preventDefault();

@@ -182,7 +182,8 @@ export default function MapScrollCamera() {
         const isTryingToLeaveAtEnd = currentIndex === steps - 1 && direction > 0;
         if (isTryingToLeaveAtStart || isTryingToLeaveAtEnd) {
           if (!(options?.allowLeaveAtEdges ?? false)) return false;
-          const edgeTarget = direction > 0 ? end + 2 : start - 2;
+          const edgeNudge = Math.max(180, Math.round(window.innerHeight * 0.35));
+          const edgeTarget = direction > 0 ? end + edgeNudge : start - edgeNudge;
           window.scrollTo({ top: Math.max(0, edgeTarget), behavior: "smooth" });
           ScrollTrigger.update();
           return true;
